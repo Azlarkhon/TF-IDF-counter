@@ -1,10 +1,12 @@
 package main
 
 import (
-    "log"
+	"log"
 
-    "github.com/gin-gonic/gin"
-    "tfidf-app/routes"
+	"tfidf-app/config"
+	"tfidf-app/routes"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -14,7 +16,7 @@ func main() {
 
     routes.Routes(router)
 	
-    if err := router.Run(":8080"); err != nil {
+    if err := router.Run(":" + config.Init.Port); err != nil {
         log.Fatal("Failed to run server: ", err)
     }
 }
