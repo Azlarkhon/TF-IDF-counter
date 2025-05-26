@@ -14,6 +14,12 @@ All notable changes to this project will be documented in this file.
 - `Performance` for performance improvements
 - `Experimental` for experimental features
 
+## [Unreleased]
+
+### Added
+
+- `Dockerfile` to containerize the application.
+
 ## [1.1.0] - 24.05.2025
 
 ### Added
