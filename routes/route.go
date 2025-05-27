@@ -12,4 +12,5 @@ func Routes(r *gin.Engine) {
 
 	r.GET("/status", controllers.GetStatus)
 	r.GET("/version", controllers.GetVersion)
+	r.GET("/metrics", controllers.GetMetrics)
 }

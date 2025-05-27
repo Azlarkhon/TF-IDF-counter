@@ -5,10 +5,14 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
+	"tfidf-app/database"
+	"tfidf-app/models"
 	"tfidf-app/services"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func ShowUploadForm(c *gin.Context) {
@@ -46,6 +50,34 @@ func HandleFileUpload(c *gin.Context) {
 
 	if len(stats) > 50 {
 		stats = stats[:50]
+	}
+
+	// Работа с метрикой
+	var metric models.Metric
+	result := database.DB.First(&metric)
+	currentTime := time.Now()
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			metric = models.Metric{
+				FilesProcessed:               1,
+				LatestFileProcessedTimestamp: currentTime,
+			}
+			if err := database.DB.Create(&metric).Error; err != nil {
+				c.String(http.StatusInternalServerError, "Database error: %s", err.Error())
+				return
+			}
+		} else {
+			c.String(http.StatusInternalServerError, "Database error: %s", result.Error.Error())
+			return
+		}
+	} else {
+		metric.FilesProcessed++
+		metric.LatestFileProcessedTimestamp = currentTime
+		if err := database.DB.Save(&metric).Error; err != nil {
+			c.String(http.StatusInternalServerError, "Database error: %s", err.Error())
+			return
+		}
 	}
 
 	c.HTML(http.StatusOK, "index.tmpl", gin.H{

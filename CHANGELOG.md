@@ -1,41 +1,42 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+Все важные изменения в этом проекте будут документироваться в этом файле.
 
 ## Types of Changes
 
-- `Added` for new features
-- `Changed` for changes in existing functionality
-- `Deprecated` for soon-to-be removed features
-- `Removed` for now removed features
-- `Fixed` for any bug fixes
-- `Security` in case of vulnerabilities
-- `Dependency` for dependency updates
-- `Performance` for performance improvements
-- `Experimental` for experimental features
+* `Added` — для новых функций
+* `Changed` — для изменений существующей функциональности
+* `Deprecated` — для функций, которые скоро будут удалены
+* `Removed` — для функций, которые уже удалены
+* `Fixed` — для исправлений ошибок
+* `Security` — в случае уязвимостей
+* `Dependency` — для обновлений зависимостей
+* `Performance` — для улучшений производительности
+* `Experimental` — для экспериментальных функций
 
 ## [Unreleased]
 
 ### Added
 
-- `samples` folder to save uploaded files.
-- `.env` to store sensitive information and environment-specific configurations.
-- `config/init.go` file which initializes env specific configurations.
-- `helper/responseBuilder.go` for structuring the response.
-- `version/version.go` to set the current version of project.
-- `controllers/systemParametersController.go` in which I added constructors for getting `status` and `version`. Also added their endpoints in `routes/route.go`.
-- `Dockerfile` to containerize the application.
-- `compose.yaml`.
-- `postgresql database`.
-- `models` to manage database tables and binding.
+* Папка `samples` для сохранения загруженных файлов.
+* `.env` для хранения чувствительной информации и конфигураций, зависящих от окружения.
+* Файл `config/init.go`, который инициализирует конфигурации в зависимости от окружения.
+* `helper/responseBuilder.go` для структурирования ответа.
+* `version/version.go` для задания текущей версии проекта.
+* `controllers/systemParametersController.go`, в котором добавлены конструкторы для получения `status` и `version`. Также добавлены соответствующие эндпоинты в `routes/route.go`.
+* `Dockerfile` для контейнеризации приложения.
+* `compose.yaml`.
+* База данных `postgresql`.
+* `models` для управления таблицами базы данных и привязкой данных.
+* `/metrics` эндпоинт и связанная логика для отслеживания и обновления метрик, таких как количество обработанных файлов и временная метка последнего обработанного файла.
 
 ### Changed
 
-* Renamed `controllers/controller.go` and `services/service.go` to `controllers/TFIDFController.go` and `services/TFIDFService.go` for better maintenance.
+* Переименованы `controllers/controller.go` и `services/service.go` в `controllers/TFIDFController.go` и `services/TFIDFService.go` для лучшей поддержки и понимания структуры.
 
 ### Dependency
 
-- Added `github.com/joho/godotenv` `v1.5.1` to manage env variables from .env file.
-- Upgraded `GO` from `v1.24.0` to `v1.24.3.`
-- Added `gorm.io/driver/postgres`.
-- Added `gorm.io/gorm`
+* Добавлен `github.com/joho/godotenv` `v1.5.1` для управления переменными окружения из `.env` файла.
+* Обновлён `GO` с версии `v1.24.0` до `v1.24.3`.
+* Добавлен `gorm.io/driver/postgres`.
+* Добавлен `gorm.io/gorm`.
