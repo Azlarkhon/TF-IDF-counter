@@ -18,18 +18,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- `Dockerfile` to containerize the application.
-
-## [1.1.0] - 24.05.2025
-
-### Added
-
 - `sample` folder to save uploaded files.
 - `.env` to store sensitive information and environment-specific configurations.
 - `config/init.go` file which initializes env specific configurations.
 - `helper/responseBuilder.go` for structuring the response.
 - `version/version.go` to set the current version of project.
 - `controllers/systemParametersController.go` in which I added constructors for getting `status` and `version`. Also added their endpoints in `routes/route.go`.
+- `Dockerfile` to containerize the application.
 
 ### Changed
 
