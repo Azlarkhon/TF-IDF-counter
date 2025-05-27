@@ -18,13 +18,16 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- `sample` folder to save uploaded files.
+- `samples` folder to save uploaded files.
 - `.env` to store sensitive information and environment-specific configurations.
 - `config/init.go` file which initializes env specific configurations.
 - `helper/responseBuilder.go` for structuring the response.
 - `version/version.go` to set the current version of project.
 - `controllers/systemParametersController.go` in which I added constructors for getting `status` and `version`. Also added their endpoints in `routes/route.go`.
 - `Dockerfile` to containerize the application.
+- `compose.yaml`.
+- `postgresql database`.
+- `models` to manage database tables and binding.
 
 ### Changed
 
@@ -33,4 +36,6 @@ All notable changes to this project will be documented in this file.
 ### Dependency
 
 - Added `github.com/joho/godotenv` `v1.5.1` to manage env variables from .env file.
-- Upgraded `GO` from `v1.24.0` to `v1.24.3`
+- Upgraded `GO` from `v1.24.0` to `v1.24.3.`
+- Added `gorm.io/driver/postgres`.
+- Added `gorm.io/gorm`

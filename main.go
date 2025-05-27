@@ -4,19 +4,22 @@ import (
 	"log"
 
 	"tfidf-app/config"
+	"tfidf-app/database"
 	"tfidf-app/routes"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    router := gin.Default()
+	database.ConnectDatabase()
 
-    router.LoadHTMLGlob("templates/*")
+	router := gin.Default()
 
-    routes.Routes(router)
-	
-    if err := router.Run(":" + config.Init.Port); err != nil {
-        log.Fatal("Failed to run server: ", err)
-    }
+	router.LoadHTMLGlob("templates/*")
+
+	routes.Routes(router)
+
+	if err := router.Run(":" + config.Init.Port); err != nil {
+		log.Fatal("Failed to run server: ", err)
+	}
 }
