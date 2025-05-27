@@ -24,13 +24,13 @@ func HandleFileUpload(c *gin.Context) {
 		return
 	}
 
-	err = os.MkdirAll("./sample", os.ModePerm)
+	err = os.MkdirAll("./samples", os.ModePerm)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Cannot create folder: %s", err.Error())
 		return
 	}
 
-	filePath := "./sample/" + file.Filename
+	filePath := "./samples/" + file.Filename
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
 		c.String(http.StatusInternalServerError, "Cannot save file: %s", err.Error())
 		return
