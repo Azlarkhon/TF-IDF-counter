@@ -11,7 +11,7 @@ type Metric struct {
 	MaxTimeProcessed             float64   `gorm:"type:decimal(10,3);default:0.0" json:"max_time_processed"`
 	TotalFileSizeMB              float64   `gorm:"type:decimal(10,3);default:0.0" json:"total_file_size_mb"`
 	AvgFileSizeMB                float64   `gorm:"type:decimal(10,3);default:0.0" json:"avg_file_size_mb"`
-	Words                        []Word    `gorm:"foreignKey:MetricID" json:"words"`
+	Words                        []Word    `gorm:"foreignKey:MetricID" json:"top_10_most_freq_words"`
 }
 
 type Word struct {
