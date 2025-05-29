@@ -22,44 +22,45 @@
 ## Структура проекта
 
 .
-├── .env                      # Переменные окружения (для локального запуска)
-├── CHANGELOG.md             # История изменений (changelog)
-├── compose.yaml             # Конфигурация Docker Compose
-├── Dockerfile               # Инструкция сборки Docker-образа
-├── go.mod / go.sum          # Зависимости Go
-├── main.go                  # Точка входа в приложение
-├── README.md                # Документация проекта
+├── .env # Переменные окружения (для локального запуска)
+├── CHANGELOG.md # История изменений (changelog)
+├── compose.yaml # Конфигурация Docker Compose
+├── Dockerfile # Инструкция сборки Docker-образа
+├── go.mod # Файл зависимостей Go
+├── go.sum # Файл контрольных сумм зависимостей
+├── main.go # Точка входа в приложение
+├── README.md # Документация проекта
 │
-├── config/                  # Инициализация конфигураций
-│   └── init.go
+├── config/ # Инициализация конфигураций
+│ └── init.go # Файл инициализации конфигураций
 │
-├── controllers/             # Контроллеры API
-│   ├── TFIDFController.go
-│   └── systemParametersController.go
+├── controllers/ # Контроллеры API
+│ ├── TFIDFController.go # Контроллер TF-IDF
+│ └── systemParametersController.go # Контроллер системных параметров
 │
-├── database/                # Инициализация базы данных
-│   └── database.go
+├── database/ # Работа с базой данных
+│ └── database.go # Инициализация подключения к БД
 │
-├── helper/                  # Вспомогательные функции
-│   └── responseBuilder.go
+├── helper/ # Вспомогательные функции
+│ └── responseBuilder.go # Построитель ответов API
 │
-├── models/                  # Модели данных
-│   └── systemParametersModel.go
+├── models/ # Модели данных
+│ └── systemParametersModel.go # Модель системных параметров
 │
-├── routes/                  # Определение маршрутов
-│   └── route.go
+├── routes/ # Маршрутизация
+│ └── route.go # Определение маршрутов API
 │
-├── samples/                 # Примеры файлов для загрузки
-│   └── sample.txt
+├── samples/ # Примеры файлов
+│ └── sample.txt # Пример текстового файла
 │
-├── services/                # Основная логика приложения (TF-IDF)
-│   └── TFIDFService.go
+├── services/ # Бизнес-логика
+│ └── TFIDFService.go # Сервис TF-IDF
 │
-├── templates/               # HTML-шаблоны
-│   └── index.tmpl
+├── templates/ # HTML шаблоны
+│ └── index.tmpl # Шаблон главной страницы
 │
-└── version/                 # Информация о версии приложения
-    └── version.go
+└── version/ # Версия приложения
+└── version.go # Информация о версии
 
 ## Начало работы
 
@@ -83,7 +84,8 @@ cd TF-IDF-counter
    ```
 2. Убедитесь, что в корне проекта уже существует файл `.env` с нужными переменными окружения:
    ```
-   DB_HOST=localhost 
+   DB_HOST=db
+
    DB_PORT=5432
    DB_USER=your_user
    DB_PASSWORD=your_password
