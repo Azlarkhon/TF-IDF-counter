@@ -21,46 +21,51 @@
 
 ## Структура проекта
 
+
+## Структура проекта
+
+```text
 .
-├── .env # Переменные окружения (для локального запуска)
-├── CHANGELOG.md # История изменений (changelog)
-├── compose.yaml # Конфигурация Docker Compose
-├── Dockerfile # Инструкция сборки Docker-образа
-├── go.mod # Файл зависимостей Go
-├── go.sum # Файл контрольных сумм зависимостей
-├── main.go # Точка входа в приложение
-├── README.md # Документация проекта
+├── .env                      # Переменные окружения
+├── CHANGELOG.md              # История изменений
+├── compose.yaml              # Docker Compose
+├── Dockerfile                # Сборка Docker
+├── go.mod                    # Зависимости Go
+├── go.sum                    # Контрольные суммы
+├── main.go                   # Точка входа
+├── README.md                 # Документация
 │
-├── config/ # Инициализация конфигураций
-│ └── init.go # Файл инициализации конфигураций
+├── config/
+│   └── init.go               # Инициализация конфигурации
 │
-├── controllers/ # Контроллеры API
-│ ├── TFIDFController.go # Контроллер TF-IDF
-│ └── systemParametersController.go # Контроллер системных параметров
+├── controllers/
+│   ├── TFIDFController.go    # Обработка TF-IDF
+│   └── systemParametersController.go # Параметры системы
 │
-├── database/ # Работа с базой данных
-│ └── database.go # Инициализация подключения к БД
+├── database/
+│   └── database.go           # Подключение к БД
 │
-├── helper/ # Вспомогательные функции
-│ └── responseBuilder.go # Построитель ответов API
+├── helper/
+│   └── responseBuilder.go    # Формирование ответов
 │
-├── models/ # Модели данных
-│ └── systemParametersModel.go # Модель системных параметров
+├── models/
+│   └── systemParametersModel.go # Модель данных
 │
-├── routes/ # Маршрутизация
-│ └── route.go # Определение маршрутов API
+├── routes/
+│   └── route.go              # Маршрутизация
 │
-├── samples/ # Примеры файлов
-│ └── sample.txt # Пример текстового файла
+├── samples/
+│   └── sample.txt            # Пример файла
 │
-├── services/ # Бизнес-логика
-│ └── TFIDFService.go # Сервис TF-IDF
+├── services/
+│   └── TFIDFService.go       # Логика TF-IDF
 │
-├── templates/ # HTML шаблоны
-│ └── index.tmpl # Шаблон главной страницы
+├── templates/
+│   └── index.tmpl            # HTML шаблон
 │
-└── version/ # Версия приложения
-└── version.go # Информация о версии
+└── version/
+    └── version.go            # Информация о версии
+```
 
 ## Начало работы
 
