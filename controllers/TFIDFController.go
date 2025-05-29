@@ -56,7 +56,7 @@ func HandleFileUpload(c *gin.Context) {
 
 	// Работа с метрикой
 	var metric models.Metric
-	result := database.DB.First(&metric)
+	result := database.DB.Preload("Words").First(&metric)
 	currentTime := time.Now()
 	fileSizeMB := float64(file.Size) / (1024 * 1024)
 	fileSizeMB = math.Round(fileSizeMB*1000) / 1024
@@ -81,6 +81,7 @@ func HandleFileUpload(c *gin.Context) {
 			return
 		}
 	} else {
+		// нью мин и макс
 		newMin := math.Min(metric.MinTimeProcessed, processingTimeRounded)
 		newMax := math.Max(metric.MaxTimeProcessed, processingTimeRounded)
 
@@ -99,6 +100,41 @@ func HandleFileUpload(c *gin.Context) {
 
 		if err := database.DB.Save(&metric).Error; err != nil {
 			c.String(http.StatusInternalServerError, "Database error: %s", err.Error())
+			return
+		}
+	}
+
+	wordCount := make(map[string]int)
+	for _, w := range words {
+		wordCount[w]++
+	}
+
+	for word, count := range wordCount {
+		var existingWord models.Word
+		result := database.DB.Where("word = ? AND metric_id = ?", word, metric.ID).First(&existingWord)
+
+		if result.Error == nil {
+			// есть, прдобавляем коунт
+			existingWord.Count += count
+			if err := database.DB.Save(&existingWord).Error; err != nil {
+				c.String(http.StatusInternalServerError, "Database error updating word: %s", err.Error())
+				return
+			}
+		} else if result.Error == gorm.ErrRecordNotFound {
+			// нет, добавляем в тейбл
+			newWord := models.Word{
+				MetricID:  metric.ID,
+				Word:      word,
+				Count:     count,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+			if err := database.DB.Create(&newWord).Error; err != nil {
+				c.String(http.StatusInternalServerError, "Database error creating word: %s", err.Error())
+				return
+			}
+		} else {
+			c.String(http.StatusInternalServerError, "Database error checking word: %s", result.Error.Error())
 			return
 		}
 	}

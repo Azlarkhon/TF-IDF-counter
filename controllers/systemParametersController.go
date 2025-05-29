@@ -25,9 +25,14 @@ func GetVersion(c *gin.Context) {
 }
 
 func GetMetrics(c *gin.Context) {
-	var metrics models.Metric
+	var metric models.Metric
 
-	result := database.DB.First(&metrics)
+	result := database.DB.
+		Preload("Words", func(db *gorm.DB) *gorm.DB {
+			return db.Order("count DESC").Limit(10)
+		}).
+		First(&metric)
+
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Metrics not found"))
@@ -37,5 +42,5 @@ func GetMetrics(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(metrics))
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(metric))
 }
