@@ -7,8 +7,8 @@ import (
 )
 
 func Routes(r *gin.Engine) {
-    r.GET("/", controllers.ShowUploadForm)
-    r.POST("/upload", controllers.HandleFileUpload)
+	r.GET("/", controllers.ShowUploadForm)
+	r.POST("/upload", controllers.HandleFileUpload)
 
 	r.GET("/status", controllers.GetStatus)
 	r.GET("/version", controllers.GetVersion)
