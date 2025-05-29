@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"math"
 	"net/http"
 	"os"
 	"regexp"
@@ -22,6 +23,8 @@ func ShowUploadForm(c *gin.Context) {
 }
 
 func HandleFileUpload(c *gin.Context) {
+	startTime := time.Now()
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.String(http.StatusBadRequest, "Bad request: %s", err.Error())
@@ -46,22 +49,28 @@ func HandleFileUpload(c *gin.Context) {
 		return
 	}
 
-	stats := services.ComputeTFIDF(words)
+	processingTime := time.Since(startTime).Seconds()
+	processingTimeRounded := math.Round(processingTime*1000) / 1000
 
-	if len(stats) > 50 {
-		stats = stats[:50]
-	}
+	stats := services.ComputeTFIDF(words)
 
 	// Работа с метрикой
 	var metric models.Metric
 	result := database.DB.First(&metric)
 	currentTime := time.Now()
+	fileSizeMB := float64(file.Size) / (1024 * 1024)
+	fileSizeMB = math.Round(fileSizeMB*1000) / 1024
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			metric = models.Metric{
 				FilesProcessed:               1,
 				LatestFileProcessedTimestamp: currentTime,
+				MinTimeProcessed:             processingTimeRounded,
+				AvgTimeProcessed:             processingTimeRounded,
+				MaxTimeProcessed:             processingTimeRounded,
+				TotalFileSizeMB:              fileSizeMB,
+				AvgFileSizeMB:                fileSizeMB,
 			}
 			if err := database.DB.Create(&metric).Error; err != nil {
 				c.String(http.StatusInternalServerError, "Database error: %s", err.Error())
@@ -72,12 +81,30 @@ func HandleFileUpload(c *gin.Context) {
 			return
 		}
 	} else {
+		newMin := math.Min(metric.MinTimeProcessed, processingTimeRounded)
+		newMax := math.Max(metric.MaxTimeProcessed, processingTimeRounded)
+
+		// нью эвередж
+		totalTime := metric.AvgTimeProcessed * float64(metric.FilesProcessed)
+		newAvg := (totalTime + processingTimeRounded) / float64(metric.FilesProcessed+1)
+		newAvg = math.Round(newAvg*1000) / 1000
+
 		metric.FilesProcessed++
 		metric.LatestFileProcessedTimestamp = currentTime
+		metric.MinTimeProcessed = newMin
+		metric.AvgTimeProcessed = newAvg
+		metric.MaxTimeProcessed = newMax
+		metric.TotalFileSizeMB += fileSizeMB
+		metric.AvgFileSizeMB = metric.TotalFileSizeMB / float64(metric.FilesProcessed)
+
 		if err := database.DB.Save(&metric).Error; err != nil {
 			c.String(http.StatusInternalServerError, "Database error: %s", err.Error())
 			return
 		}
+	}
+
+	if len(stats) > 50 {
+		stats = stats[:50]
 	}
 
 	c.HTML(http.StatusOK, "index.tmpl", gin.H{
