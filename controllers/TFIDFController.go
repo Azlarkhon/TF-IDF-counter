@@ -1,3 +1,4 @@
+// get metrics at once, not one by one
 package controllers
 
 import (
@@ -109,32 +110,50 @@ func HandleFileUpload(c *gin.Context) {
 		wordCount[w]++
 	}
 
-	for word, count := range wordCount {
-		var existingWord models.Word
-		result := database.DB.Where("word = ? AND metric_id = ?", word, metric.ID).First(&existingWord)
+	wordList := make([]string, 0, len(wordCount))
+	for word := range wordCount {
+		wordList = append(wordList, word)
+	}
 
-		if result.Error == nil {
-			// есть, прдобавляем коунт
-			existingWord.Count += count
-			if err := database.DB.Save(&existingWord).Error; err != nil {
-				c.String(http.StatusInternalServerError, "Database error updating word: %s", err.Error())
-				return
-			}
-		} else if result.Error == gorm.ErrRecordNotFound {
-			// нет, добавляем в тейбл
-			newWord := models.Word{
+	var existingWords []models.Word
+	if err := database.DB.
+		Where("word IN ? AND metric_id = ?", wordList, metric.ID).
+		Find(&existingWords).Error; err != nil {
+		c.String(http.StatusInternalServerError, "Database error finding existing words: %s", err.Error())
+		return
+	}
+
+	// Юзаю хэшмэп чтобы найти слова быстрее
+	existingWordMap := make(map[string]*models.Word)
+	for i := range existingWords {
+		existingWordMap[existingWords[i].Word] = &existingWords[i]
+	}
+
+	newWords := make([]models.Word, 0)
+	for word, count := range wordCount {
+		if existing, found := existingWordMap[word]; found {
+			existing.Count += count
+		} else {
+			newWords = append(newWords, models.Word{
 				MetricID:  metric.ID,
 				Word:      word,
 				Count:     count,
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
-			}
-			if err := database.DB.Create(&newWord).Error; err != nil {
-				c.String(http.StatusInternalServerError, "Database error creating word: %s", err.Error())
-				return
-			}
-		} else {
-			c.String(http.StatusInternalServerError, "Database error checking word: %s", result.Error.Error())
+			})
+		}
+	}
+
+	if len(existingWords) > 0 {
+		if err := database.DB.Save(&existingWords).Error; err != nil {
+			c.String(http.StatusInternalServerError, "Database error updating words: %s", err.Error())
+			return
+		}
+	}
+
+	if len(newWords) > 0 {
+		if err := database.DB.Create(&newWords).Error; err != nil {
+			c.String(http.StatusInternalServerError, "Database error creating words: %s", err.Error())
 			return
 		}
 	}
