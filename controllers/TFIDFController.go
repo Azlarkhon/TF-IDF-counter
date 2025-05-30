@@ -1,4 +1,3 @@
-// get metrics at once, not one by one
 package controllers
 
 import (
