@@ -21,7 +21,6 @@
 
 ## Структура проекта
 
-
 ## Структура проекта
 
 ```text
@@ -89,13 +88,17 @@ cd TF-IDF-counter
    ```
 2. Убедитесь, что в корне проекта уже существует файл `.env` с нужными переменными окружения:
    ```
-   DB_HOST=db
-
-   DB_PORT=5432
-   DB_USER=your_user
+   DB_HOST=
+   DB_PORT=
+   DB_USER=
    DB_PASSWORD=your_password
-   DB_NAME=tfidf_db
-   PORT=8080
+   DB_NAME=
+
+   PORT=
+
+   POSTGRES_USER=
+   POSTGRES_PASSWORD=
+   POSTGRES_DB=
    ```
 3. Запустите сервер
    ```
