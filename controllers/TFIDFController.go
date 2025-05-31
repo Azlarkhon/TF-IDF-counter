@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"tfidf-app/helper"
 	"tfidf-app/services"
 
 	"github.com/gin-gonic/gin"
@@ -23,25 +24,25 @@ func HandleFileUpload(c *gin.Context) {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.String(http.StatusBadRequest, "Bad request: %s", err.Error())
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Bad request: " + err.Error()))
 		return
 	}
 
 	err = os.MkdirAll("./samples", os.ModePerm)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Cannot create folder: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot create folder: " + err.Error()))
 		return
 	}
 
 	filePath := "./samples/" + file.Filename
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
-		c.String(http.StatusInternalServerError, "Cannot save file: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot save file: " + err.Error()))
 		return
 	}
 
 	words, err := processFile(filePath)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Cannot process file: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot process file: " + err.Error()))
 		return
 	}
 
@@ -50,16 +51,15 @@ func HandleFileUpload(c *gin.Context) {
 
 	stats := services.ComputeTFIDF(words)
 
-	// Работа с метрикой
 	metric, err := services.UpdateMetrics(processingTime, fileSizeMB)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Database error: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error: " + err.Error()))
 		return
 	}
 
 	err = services.SaveWords(words, metric.ID)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Database error saving words: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error saving words: " + err.Error()))
 		return
 	}
 
