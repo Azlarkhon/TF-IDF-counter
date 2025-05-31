@@ -49,8 +49,8 @@ func HandleFileUpload(c *gin.Context) {
 		return
 	}
 
-	processingTime := time.Since(startTime).Seconds()
-	processingTimeRounded := math.Round(processingTime*1000) / 1000
+	processingTime := services.CalculateProcessingTime(startTime)
+	fileSizeMB := services.RoundFileSizeMB(file.Size)
 
 	stats := services.ComputeTFIDF(words)
 
@@ -58,17 +58,15 @@ func HandleFileUpload(c *gin.Context) {
 	var metric models.Metric
 	result := database.DB.Preload("Words").First(&metric)
 	currentTime := time.Now()
-	fileSizeMB := float64(file.Size) / (1024 * 1024)
-	fileSizeMB = math.Round(fileSizeMB*1000) / 1024
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			metric = models.Metric{
 				FilesProcessed:               1,
 				LatestFileProcessedTimestamp: currentTime,
-				MinTimeProcessed:             processingTimeRounded,
-				AvgTimeProcessed:             processingTimeRounded,
-				MaxTimeProcessed:             processingTimeRounded,
+				MinTimeProcessed:             processingTime,
+				AvgTimeProcessed:             processingTime,
+				MaxTimeProcessed:             processingTime,
 				TotalFileSizeMB:              fileSizeMB,
 				AvgFileSizeMB:                fileSizeMB,
 			}
@@ -82,12 +80,12 @@ func HandleFileUpload(c *gin.Context) {
 		}
 	} else {
 		// нью мин и макс
-		newMin := math.Min(metric.MinTimeProcessed, processingTimeRounded)
-		newMax := math.Max(metric.MaxTimeProcessed, processingTimeRounded)
+		newMin := math.Min(metric.MinTimeProcessed, processingTime)
+		newMax := math.Max(metric.MaxTimeProcessed, processingTime)
 
 		// нью эвередж
 		totalTime := metric.AvgTimeProcessed * float64(metric.FilesProcessed)
-		newAvg := (totalTime + processingTimeRounded) / float64(metric.FilesProcessed+1)
+		newAvg := (totalTime + processingTime) / float64(metric.FilesProcessed+1)
 		newAvg = math.Round(newAvg*1000) / 1000
 
 		metric.FilesProcessed++

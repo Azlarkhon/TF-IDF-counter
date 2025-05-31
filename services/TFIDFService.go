@@ -3,6 +3,7 @@ package services
 import (
 	"math"
 	"sort"
+	"time"
 )
 
 type WordStat struct {
@@ -41,4 +42,14 @@ func ComputeTFIDF(words []string) []WordStat {
 	})
 
 	return stats
+}
+
+func CalculateProcessingTime(start time.Time) float64 {
+	seconds := time.Since(start).Seconds()
+	return math.Round(seconds*1000) / 1000
+}
+
+func RoundFileSizeMB(size int64) float64 {
+	mb := float64(size) / (1024 * 1024)
+	return math.Round(mb*1000) / 1000
 }
