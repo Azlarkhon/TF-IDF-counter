@@ -1,5 +1,6 @@
 services:
   app:
+    container_name: lesta-start_tfidf-app
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,6 +21,7 @@ services:
       - internal
 
   db:
+    container_name: lesta-start_tfidf-db
     image: postgres:latest
     restart: always
     user: ${POSTGRES_USER}
