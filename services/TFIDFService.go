@@ -86,7 +86,7 @@ func UpdateMetrics(processingTime float64, fileSizeMB float64) (models.Metric, e
 	metric.MinTimeProcessed = math.Min(metric.MinTimeProcessed, processingTime)
 	metric.MaxTimeProcessed = math.Max(metric.MaxTimeProcessed, processingTime)
 	totalTime := metric.AvgTimeProcessed * float64(metric.FilesProcessed-1)
-	metric.AvgTimeProcessed = math.Round((totalTime+processingTime)*1000) / 1000
+	metric.AvgTimeProcessed = (totalTime + processingTime) / float64(metric.FilesProcessed)
 	metric.TotalFileSizeMB += fileSizeMB
 	metric.AvgFileSizeMB = metric.TotalFileSizeMB / float64(metric.FilesProcessed)
 
