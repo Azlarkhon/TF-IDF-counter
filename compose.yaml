@@ -5,8 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
-    ports:
-      - "${PORT}:${PORT}"
+    expose:
+      - "8080"
     environment:
       - PORT=${PORT}
       - DB_HOST=${DB_HOST}
@@ -22,9 +22,8 @@ services:
 
   db:
     container_name: lesta-start_tfidf-db
-    image: postgres:latest
+    image: postgres:16.2
     restart: always
-    user: ${POSTGRES_USER}
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -36,6 +35,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - internal
+
+  nginx:
+    container_name: lesta-start_nginx
+    image: nginx:1.26.0-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
     networks:
       - internal
 
