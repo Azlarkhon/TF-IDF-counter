@@ -8,7 +8,7 @@ COPY . .
 # Статическая сборка бинарника
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o /bin/main ./main.go
 
-FROM alpine AS production
+FROM alpine:3.18 AS production
 
 # Копируем бинарник
 COPY --from=build /bin/main /bin/main
