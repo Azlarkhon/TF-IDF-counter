@@ -14,36 +14,47 @@
 * `Performance` — для улучшений производительности
 * `Experimental` — для экспериментальных функций
 
-## 29.05.2026 - v1.1.0
+## [Unreleased]
 
 ### Added
 
-* Папка `samples` для сохранения загруженных файлов.
-* `.env` для хранения чувствительной информации и конфигураций, зависящих от окружения.
-* Файл `config/init.go`, который инициализирует конфигурации в зависимости от окружения.
-* `helper/responseBuilder.go` для структурирования ответа.
-* `version/version.go` для задания текущей версии проекта.
-* `controllers/systemParametersController.go`, в котором добавлены конструкторы для получения `status` и `version`. Также добавлены соответствующие эндпоинты в `routes/route.go`.
-* `Dockerfile` для контейнеризации приложения.
-* `compose.yaml`.
-* База данных `postgresql`.
-* `models` для управления таблицами базы данных и привязкой данных.
-* `/metrics` эндпоинт и связанная логика для отслеживания и обновления метрик, таких как количество обработанных файлов, временная метка последнего обработанного файла, статистика по времени обработки и размеру файлов.
-  * **`files_processed`** : Общее количество успешно обработанных файлов (в примере — 9).
-  * **`latest_file_processed_timestamp`** : Временная метка последнего обработанного файла.
-  * **`min_time_processed` / `avg_time_processed` / `max_time_processed`** : Минимальное, среднее и максимальное время, затраченное на обработку одного файла (в секундах).
-  * **`total_file_size_mb` / `avg_file_size_mb`** : Общий и средний размер обработанных файлов в мегабайтах.
-  * **`top_10_most_freq_words`** : Топ-10 наиболее часто встречающихся слов с их количеством, что может использоваться для анализа содержимого файлов.
-* `README.md` для описания проекта.
-* `nginx` для улучшения производительности при высокой нагрузке, лимитирования количества соединений и запросов с одного ip и для последующих улучшений приложения (готов к масштабированию).
-
-### Changed
-
-* Переименованы `controllers/controller.go` и `services/service.go` в `controllers/TFIDFController.go` и `services/TFIDFService.go` для лучшей поддержки и понимания структуры.
+* Авторизация и Аутентификация (cookie based JWT)
+* API для пользователей (login, register, logout, updatePassword, delete user)
 
 ### Dependency
 
-* Добавлен `github.com/joho/godotenv` `v1.5.1` для управления переменными окружения из `.env` файла.
-* Обновлён `GO` с версии `v1.24.0` до `v1.24.3`.
-* Добавлен `gorm.io/driver/postgres`.
-* Добавлен `gorm.io/gorm`.
+* Добавлен github.com/golang-jwt/jwt/v4 для генерации jwt
+* Добавлен golang.org/x/crypto для хэширования пароля юзера
+
+## [29.05.2025] — v1.1.0
+
+### Added
+
+* Папка `samples/` — для хранения загружаемых файлов
+* `.env` — конфигурация переменных окружения
+* `config/init.go` — инициализация конфигурации
+* `helper/responseBuilder.go` — универсальный формат ответов API
+* `version/version.go` — хранение версии приложения
+* `controllers/systemParametersController.go` — эндпоинты `/status` и `/version`
+* `Dockerfile` и `compose.yaml` — контейнеризация приложения
+* База данных PostgreSQL и модели (`models/`)
+* Эндпоинт `/metrics` для мониторинга и сбора статистики:
+  * `files_processed`
+  * `latest_file_processed_timestamp`
+  * `min_time_processed`, `avg_time_processed`, `max_time_processed`
+  * `total_file_size_mb`, `avg_file_size_mb`
+  * `top_10_most_freq_words`
+* `README.md` — описание проекта
+* Nginx — базовая настройка для проксирования, ограничения нагрузки и масштабируемости
+
+### Changed
+
+* `controllers/controller.go` → `controllers/TFIDFController.go`
+* `services/service.go` → `services/TFIDFService.go` — переименование для повышения читаемости и модульности
+
+### Dependency
+
+* `github.com/joho/godotenv v1.5.1` — поддержка `.env`
+* `gorm.io/driver/postgres` — PostgreSQL-драйвер для GORM
+* `gorm.io/gorm` — ORM
+* Обновление версии Go: `v1.24.0` → `v1.24.3`

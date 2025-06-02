@@ -14,6 +14,7 @@ type Config struct {
 	DB_PORT     string
 	DB_USER     string
 	DB_PASSWORD string
+	JWTSecret   string
 }
 
 var Init Config
@@ -31,5 +32,6 @@ func init() {
 		DB_PORT:     os.Getenv("DB_PORT"),
 		DB_USER:     os.Getenv("DB_USER"),
 		DB_PASSWORD: os.Getenv("DB_PASSWORD"),
+		JWTSecret:   os.Getenv("JWT_SECRET"),
 	}
 }

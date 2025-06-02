@@ -18,6 +18,7 @@ func main() {
 	router.LoadHTMLGlob("templates/*")
 
 	routes.Routes(router)
+	routes.UserRoutes(router)
 
 	if err := router.Run(":" + config.Init.Port); err != nil {
 		log.Fatal("Failed to run server: ", err)

@@ -31,6 +31,7 @@ func migrate() {
 	err := DB.AutoMigrate(
 		&models.Metric{},
 		&models.Word{},
+		&models.User{},
 	)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)
