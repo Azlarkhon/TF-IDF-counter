@@ -43,7 +43,7 @@ func ComputeTFIDF(words []string) []WordStat {
 	}
 
 	sort.Slice(stats, func(i, j int) bool {
-		return stats[i].TF > stats[j].TF
+		return stats[i].IDF > stats[j].IDF
 	})
 
 	return stats
