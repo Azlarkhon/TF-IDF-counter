@@ -179,6 +179,12 @@
       font-weight: bold;
     }
     
+    #message {
+      margin-top: 1rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
     @media (max-width: 768px) {
       .container {
         padding-left: 1rem;
@@ -207,7 +213,7 @@
         Upload Document
       </div>
       <div class="card-body">
-        <form action="/upload" method="post" enctype="multipart/form-data">
+        <form id="uploadForm">
           <div class="file-upload-wrapper">
             <label class="file-upload-label">
               <div class="file-upload-icon">
@@ -220,6 +226,7 @@
               <input type="file" name="file" class="file-upload-input" id="fileInput" required accept=".txt">
             </label>
           </div>
+          <div id="message"></div>
           <div class="d-grid">
             <button type="submit" class="btn btn-primary btn-lg">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-arrow-up me-2" viewBox="0 0 16 16">
@@ -233,17 +240,16 @@
       </div>
     </div>
     
-    {{ if .words }}
-    <div class="card">
+    <div id="results" class="card" style="display:none;">
       <div class="card-header">
         <div class="results-header">
           <h2 class="mb-0">Analysis Results</h2>
-          <span class="badge badge-count">{{ len .words }} terms</span>
+          <span id="resultsCount" class="badge badge-count">0 terms</span>
         </div>
       </div>
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-hover align-middle">
+          <table class="table table-hover align-middle" id="resultsTable">
             <thead>
               <tr>
                 <th scope="col">Term</th>
@@ -253,30 +259,26 @@
                 <th scope="col" class="text-end">TF-IDF</th>
               </tr>
             </thead>
-            <tbody>
-              {{ range .words }}
-              <tr>
-                <td><strong>{{ .Word }}</strong></td>
-                <td class="text-end">{{ .Count }}</td>
-                <td class="text-end">{{ printf "%.5f" .TF }}</td>
-                <td class="text-end">{{ printf "%.5f" .IDF }}</td>
-                <td class="text-end tfidf-value">{{ printf "%.5f" .TFIDF }}</td>
-              </tr>
-              {{ end }}
-            </tbody>
+            <tbody></tbody>
           </table>
         </div>
       </div>
     </div>
-    {{ end }}
   </div>
 
   <!-- Bootstrap Bundle with Popper JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    const form = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('fileInput');
+    const message = document.getElementById('message');
+    const resultsDiv = document.getElementById('results');
+    const resultsTable = document.getElementById('resultsTable').getElementsByTagName('tbody')[0];
+    const resultsCount = document.getElementById('resultsCount');
+
     // Add file name display when a file is selected
-    document.getElementById('fileInput').addEventListener('change', function(e) {
-      const fileName = e.target.files[0]?.name || 'No file chosen';
+    fileInput.addEventListener('change', function(e) {
+      const fileName = e.target.files[0]?.name || 'Choose a file or drag it here';
       const fileText = document.querySelector('.file-upload-text');
       if (fileText) {
         fileText.textContent = fileName;
@@ -306,12 +308,85 @@
         fileUploadLabel.style.backgroundColor = 'var(--card-bg)';
         
         if (e.dataTransfer.files.length) {
-          document.getElementById('fileInput').files = e.dataTransfer.files;
+          fileInput.files = e.dataTransfer.files;
           const event = new Event('change');
-          document.getElementById('fileInput').dispatchEvent(event);
+          fileInput.dispatchEvent(event);
         }
       });
     }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const file = fileInput.files[0];
+      if (!file) {
+        message.textContent = 'Please select a file';
+        return;
+      }
+
+      message.textContent = 'Uploading and analyzing document...';
+      message.style.color = 'var(--primary)';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          message.textContent = data.error || 'An error occurred during analysis.';
+          message.style.color = 'red';
+          resultsDiv.style.display = 'none';
+          return;
+        }
+
+        message.textContent = 'Analysis complete!';
+        message.style.color = 'green';
+        resultsTable.innerHTML = ''; // Clear old results
+
+        data.words.forEach(item => {
+          const row = resultsTable.insertRow();
+          
+          // Term
+          const termCell = row.insertCell();
+          termCell.innerHTML = `<strong>${item.Word}</strong>`;
+          
+          // Count
+          const countCell = row.insertCell();
+          countCell.textContent = item.Count;
+          countCell.className = 'text-end';
+          
+          // TF
+          const tfCell = row.insertCell();
+          tfCell.textContent = item.TF.toFixed(5);
+          tfCell.className = 'text-end';
+          
+          // IDF
+          const idfCell = row.insertCell();
+          idfCell.textContent = item.IDF.toFixed(5);
+          idfCell.className = 'text-end';
+          
+          // TF-IDF
+          const tfidfCell = row.insertCell();
+          tfidfCell.textContent = item.TFIDF.toFixed(5);
+          tfidfCell.className = 'text-end tfidf-value';
+        });
+
+        // Update results count
+        resultsCount.textContent = `${data.words.length} terms`;
+        resultsDiv.style.display = 'block';
+
+      } catch (err) {
+        message.textContent = 'Error: ' + err.message;
+        message.style.color = 'red';
+        resultsDiv.style.display = 'none';
+      }
+    });
   </script>
 </body>
 </html>

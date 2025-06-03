@@ -67,7 +67,7 @@ func HandleFileUpload(c *gin.Context) {
 		stats = stats[:50]
 	}
 
-	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"words": stats,
 	})
 }
