@@ -117,8 +117,8 @@ func Login(c *gin.Context) {
 		2592000,      // 30 дней в секундах,
 		"/",          // Путь
 		"",           // Домен (localhost)
-		true,         // Secure (HTTPS-only)
-		true,         // HTTP-Only (защита от XSS)
+		false,         // Secure (HTTPS-only)
+		false,         // HTTP-Only (защита от XSS)
 	)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -135,7 +135,7 @@ func Logout(c *gin.Context) {
 		"/",
 		"",
 		false,
-		true,
+		false,
 	)
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
 }

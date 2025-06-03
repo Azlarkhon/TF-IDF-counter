@@ -2,15 +2,21 @@ package routes
 
 import (
 	"tfidf-app/controllers"
+	"tfidf-app/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Routes(r *gin.Engine) {
 	r.GET("/", controllers.ShowUploadForm)
-	r.POST("/upload", controllers.HandleFileUpload)
 
 	r.GET("/status", controllers.GetStatus)
 	r.GET("/version", controllers.GetVersion)
 	r.GET("/metrics", controllers.GetMetrics)
+
+	protected := r.Group("/")
+	protected.Use(middleware.AuthMiddleware)
+	{
+		protected.POST("/upload", controllers.HandleFileUpload)
+	}
 }
