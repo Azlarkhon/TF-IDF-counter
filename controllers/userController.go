@@ -194,5 +194,5 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
+	Logout(c)
 }
