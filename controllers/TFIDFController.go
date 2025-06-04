@@ -38,6 +38,14 @@ func HandleFileUpload(c *gin.Context) {
 		return
 	}
 
+	// Проверка: существует ли уже документ с таким именем у этого пользователя
+	var existingDoc models.Document
+	if err := database.DB.
+		Where("name = ? AND user_id = ?", file.Filename, userID).First(&existingDoc).Error; err == nil {
+		c.JSON(http.StatusConflict, helper.NewErrorResponse("Document with the same name already exists"))
+		return
+	}
+
 	// Путь до папки пользователя
 	userDir := fmt.Sprintf("documents/user_%d", userID)
 	fullPath := filepath.Join("/app", userDir)

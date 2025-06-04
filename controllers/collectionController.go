@@ -42,6 +42,91 @@ func CreateCollection(c *gin.Context) {
 	c.JSON(http.StatusCreated, helper.NewSuccessResponse(collection))
 }
 
+func AddDocumentToCollection(c *gin.Context) {
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
+		return
+	}
+
+	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
+	if !authorized {
+		return
+	}
+
+	collectionID := c.Param("collection_id")
+	documentID := c.Param("document_id")
+	if collectionID == "" || documentID == "" {
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Collection ID and Document ID are required"))
+		return
+	}
+
+	var collection models.Collection
+	if err := database.DB.
+		Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
+		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
+		return
+	}
+
+	var document models.Document
+	if err := database.DB.
+		Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
+		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+		return
+	}
+
+	// Добавление документа в коллекцию через связь many2many
+	if err := database.DB.Model(&collection).Association("Documents").Append(&document); err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to add document to collection"))
+		return
+	}
+
+	c.JSON(http.StatusOK, helper.NewSuccessResponse("Document successfully added to collection"))
+}
+
+func DeleteDocumentFromCollection(c *gin.Context) {
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
+		return
+	}
+
+	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
+	if !authorized {
+		return
+	}
+
+	collectionID := c.Param("collection_id")
+	documentID := c.Param("document_id")
+	if collectionID == "" || documentID == "" {
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Collection ID and Document ID are required"))
+		return
+	}
+
+	var collection models.Collection
+	if err := database.DB.
+		Where("id = ? AND user_id = ?", collectionID, userID).
+		First(&collection).Error; err != nil {
+		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
+		return
+	}
+
+	var document models.Document
+	if err := database.DB.
+		Where("id = ? AND user_id = ?", documentID, userID).
+		First(&document).Error; err != nil {
+		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+		return
+	}
+
+	if err := database.DB.Model(&collection).Association("Documents").Delete(&document); err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to remove document from collection"))
+		return
+	}
+
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
+}
+
 func GetCollections(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -55,7 +140,7 @@ func GetCollections(c *gin.Context) {
 	}
 
 	var collections []models.Collection
-	if err := database.DB.Where("user_id = ?", userID).Find(&collections).Error; err != nil {
+	if err := database.DB.Preload("Documents").Where("user_id = ?", userID).Find(&collections).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get collections"))
 		return
 	}
@@ -82,7 +167,7 @@ func GetCollectionByID(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.First(&collection, collectionID).Error; err != nil {
+	if err := database.DB.Preload("Documents").First(&collection, collectionID).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 		return
 	}

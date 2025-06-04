@@ -12,3 +12,11 @@ type Collection struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type CollectionDocument struct {
+	CollectionID uint `gorm:"primaryKey"`
+	DocumentID   uint `gorm:"primaryKey"`
+
+	Collection Collection `gorm:"constraint:OnDelete:CASCADE;foreignKey:CollectionID"`
+	Document   Document   `gorm:"constraint:OnDelete:CASCADE;foreignKey:DocumentID"`
+}

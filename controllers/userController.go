@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"tfidf-app/database"
 	"tfidf-app/dto"
@@ -185,6 +187,14 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
+	// Удаление папки пользователя со всеми файлами
+	userDir := fmt.Sprintf("/app/documents/user_%d", id)
+	if err := os.RemoveAll(userDir); err != nil && !os.IsNotExist(err) {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to delete user's folder: "+err.Error()))
+		return
+	}
+
+	// Удаление пользователя из базы данных
 	result := database.DB.Delete(&models.User{}, id)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to delete user"))

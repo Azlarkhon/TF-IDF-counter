@@ -9,6 +9,7 @@ import (
 	"tfidf-app/models"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func GetDocuments(c *gin.Context) {
@@ -75,4 +76,47 @@ func GetDocumentByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(response))
+}
+
+func DeleteDocument(c *gin.Context) {
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
+		return
+	}
+
+	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
+	if !authorized {
+		return
+	}
+
+	documentID := c.Param("document_id")
+	if documentID == "" {
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Document ID is required"))
+		return
+	}
+
+	var document models.Document
+	if err := database.DB.Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get document"))
+		return
+	}
+
+	// Удаление файла с диска
+	if err := os.Remove(document.FilePath); err != nil && !os.IsNotExist(err) {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to delete file from disk: "+err.Error()))
+		return
+	}
+
+	// Удаление записи из базы данных
+	if err := database.DB.Delete(&document).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to delete document from database"))
+		return
+	}
+
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
 }
