@@ -82,12 +82,8 @@ func GetCollectionByID(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
-			return
-		}
-		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get collection"))
+	if err := database.DB.First(&collection, collectionID).Error; err != nil {
+		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 		return
 	}
 
