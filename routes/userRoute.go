@@ -16,7 +16,7 @@ func UserRoutes(r *gin.Engine) {
 
 	userGroup.Use(middleware.AuthMiddleware)
 	{
-		userGroup.GET("/:user_id", controllers.GetUserByID)
+		userGroup.GET("/me", controllers.GetMe)
 		userGroup.PATCH("/:user_id", controllers.UpdateUser)
 		userGroup.DELETE("/:user_id", controllers.DeleteUser)
 	}

@@ -73,3 +73,17 @@ func CheckAuthenticationAndAuthorization(c *gin.Context, userID int) (int, bool)
 
 	return loggedInUserID, true
 }
+
+func GetUserIDFromContext(c *gin.Context) (int, error) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		return 0, errors.New("user_id not found in context")
+	}
+
+	id, ok := userID.(int)
+	if !ok {
+		return 0, errors.New("invalid user_id type in context")
+	}
+
+	return id, nil
+}

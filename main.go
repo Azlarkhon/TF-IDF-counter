@@ -19,6 +19,8 @@ func main() {
 
 	routes.Routes(router)
 	routes.UserRoutes(router)
+	routes.DocumentRoute(router)
+	routes.CollectionRoute(router)
 
 	if err := router.Run(":" + config.Init.Port); err != nil {
 		log.Fatal("Failed to run server: ", err)

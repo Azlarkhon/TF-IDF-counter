@@ -11,5 +11,5 @@ type LoginRequest struct {
 }
 
 type UpdateUserRequest struct {
-	NewPassword string `json:"new_password"`
+	NewPassword string `json:"password"`
 }

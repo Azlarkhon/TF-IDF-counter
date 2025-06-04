@@ -32,6 +32,10 @@ func migrate() {
 		&models.Metric{},
 		&models.Word{},
 		&models.User{},
+		&models.Document{},
+		&models.Collection{},
+		&models.TermFrequency{},
+		&models.InverseDocumentFrequency{},
 	)
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)

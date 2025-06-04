@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"tfidf-app/database"
@@ -15,23 +14,21 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetUserByID(c *gin.Context) {
-	idStr := c.Param("user_id")
-	id, err := strconv.Atoi(idStr)
-	fmt.Println(idStr)
+func GetMe(c *gin.Context) {
+	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Invalid user id format"))
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
 		return
 	}
 
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, id)
+	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
 	if !authorized {
 		return
 	}
 
-	var newUser models.User
+	var me models.User
 
-	result := database.DB.Where("id = ?", id).First(&newUser)
+	result := database.DB.Where("id = ?", userID).First(&me)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, helper.NewErrorResponse("User not found"))
@@ -41,7 +38,7 @@ func GetUserByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(newUser))
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(me))
 }
 
 func Register(c *gin.Context) {
@@ -117,8 +114,8 @@ func Login(c *gin.Context) {
 		2592000,      // 30 дней в секундах,
 		"/",          // Путь
 		"",           // Домен (localhost)
-		false,         // Secure (HTTPS-only)
-		false,         // HTTP-Only (защита от XSS)
+		false,        // Secure (HTTPS-only)
+		false,        // HTTP-Only (защита от XSS)
 	)
 
 	c.JSON(http.StatusOK, gin.H{
