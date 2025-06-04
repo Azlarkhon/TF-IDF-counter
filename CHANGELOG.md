@@ -20,6 +20,8 @@
 
 * Авторизация и Аутентификация (cookie based JWT)
 * API для пользователей (login, register, logout, updatePassword, delete user)
+* API для документов и коллекций (crud и указанные в тз)
+* Volume для хранения документов (user_id/document)
 
 ### Dependency
 
@@ -30,7 +32,6 @@
 
 ### Added
 
-* Папка `samples/` — для хранения загружаемых файлов
 * `.env` — конфигурация переменных окружения
 * `config/init.go` — инициализация конфигурации
 * `helper/responseBuilder.go` — универсальный формат ответов API
