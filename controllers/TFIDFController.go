@@ -1,13 +1,17 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
 
+	"tfidf-app/database"
 	"tfidf-app/helper"
+	"tfidf-app/models"
 	"tfidf-app/services"
 
 	"github.com/gin-gonic/gin"
@@ -22,27 +26,50 @@ func ShowUploadForm(c *gin.Context) {
 func HandleFileUpload(c *gin.Context) {
 	startTime := time.Now()
 
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("Unauthorized"))
+		return
+	}
+
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Bad request: " + err.Error()))
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("No file provided: "+err.Error()))
 		return
 	}
 
-	err = os.MkdirAll("./samples", os.ModePerm)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot create folder: " + err.Error()))
+	// Путь до папки пользователя
+	userDir := fmt.Sprintf("documents/user_%d", userID)
+	fullPath := filepath.Join("/app", userDir)
+
+	// Создаём папку, если не существует
+	if err := os.MkdirAll(fullPath, os.ModePerm); err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot create user folder: "+err.Error()))
 		return
 	}
 
-	filePath := "./samples/" + file.Filename
+	// Сохраняем файл
+	filePath := filepath.Join(fullPath, file.Filename)
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
-		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot save file: " + err.Error()))
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot save file: "+err.Error()))
+		return
+	}
+
+	// Сохраняем метаинформацию в БД
+	document := models.Document{
+		Name:     file.Filename,
+		FilePath: filePath,
+		UserID:   userID,
+	}
+
+	if err := database.DB.Create(&document).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to save document: "+err.Error()))
 		return
 	}
 
 	words, err := processFile(filePath)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot process file: " + err.Error()))
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot process file: "+err.Error()))
 		return
 	}
 
@@ -53,13 +80,13 @@ func HandleFileUpload(c *gin.Context) {
 
 	metric, err := services.UpdateMetrics(processingTime, fileSizeMB)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error: " + err.Error()))
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error: "+err.Error()))
 		return
 	}
 
 	err = services.SaveWords(words, metric.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error saving words: " + err.Error()))
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error saving words: "+err.Error()))
 		return
 	}
 

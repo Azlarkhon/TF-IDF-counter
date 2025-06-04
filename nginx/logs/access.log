@@ -304,3 +304,4 @@
 172.18.0.1 - - [04/Jun/2025:07:47:13 +0000] "GET /collections/ HTTP/1.1" 200 480 "-" "PostmanRuntime/7.44.0"
 172.18.0.1 - - [04/Jun/2025:07:47:21 +0000] "PUT /collections/3 HTTP/1.1" 200 178 "-" "PostmanRuntime/7.44.0"
 172.18.0.1 - - [04/Jun/2025:07:47:25 +0000] "GET /collections/ HTTP/1.1" 200 479 "-" "PostmanRuntime/7.44.0"
+172.18.0.1 - - [04/Jun/2025:07:52:06 +0000] "GET /users/me HTTP/1.1" 200 147 "-" "PostmanRuntime/7.44.0"
