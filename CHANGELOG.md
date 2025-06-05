@@ -23,6 +23,10 @@
 * API для документов и коллекций (crud и указанные в тз)
 * Volume для хранения документов (user_id/document)
 
+### Changed
+
+* Добавил транзакцию(db) в HandleFileUpload
+
 ### Dependency
 
 * Добавлен github.com/golang-jwt/jwt/v4 для генерации jwt

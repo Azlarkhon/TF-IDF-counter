@@ -1,0 +1,2 @@
+172.18.0.1 - - [05/Jun/2025:12:04:56 +0000] "POST /users/register HTTP/1.1" 200 153 "-" "PostmanRuntime/7.44.0"
+172.18.0.1 - - [05/Jun/2025:12:04:59 +0000] "POST /users/login HTTP/1.1" 200 26 "-" "PostmanRuntime/7.44.0"
