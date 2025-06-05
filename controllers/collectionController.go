@@ -84,6 +84,57 @@ func AddDocumentToCollection(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse("Document successfully added to collection"))
 }
 
+func AddDocumentToCollections(c *gin.Context) {
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
+		return
+	}
+
+	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
+	if !authorized {
+		return
+	}
+
+	var req dto.AddDocumentToCollectionsReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Invalid input"))
+		return
+	}
+
+	if len(req.CollectionIDs) == 0 {
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Collection IDs are required"))
+		return
+	}
+
+	var document models.Document
+	if err := database.DB.Where("id = ? AND user_id = ?", req.DocumentID, userID).First(&document).Error; err != nil {
+		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+		return
+	}
+
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		for _, collectionID := range req.CollectionIDs {
+			var collection models.Collection
+			if err := tx.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
+				return err
+			}
+
+			if err := tx.Model(&collection).Association("Documents").Append(&document); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to add document to one or more collections"))
+		return
+	}
+
+	c.JSON(http.StatusOK, helper.NewSuccessResponse("Document successfully added to all specified collections"))
+}
+
 func DeleteDocumentFromCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -104,17 +155,13 @@ func DeleteDocumentFromCollection(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.
-		Where("id = ? AND user_id = ?", collectionID, userID).
-		First(&collection).Error; err != nil {
+	if err := database.DB.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 		return
 	}
 
 	var document models.Document
-	if err := database.DB.
-		Where("id = ? AND user_id = ?", documentID, userID).
-		First(&document).Error; err != nil {
+	if err := database.DB.Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
 		return
 	}

@@ -2,9 +2,9 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"sort"
-	"tfidf-app/database"
 	"tfidf-app/models"
 	"time"
 
@@ -59,10 +59,11 @@ func RoundFileSizeMB(size int64) float64 {
 	return math.Round(mb*1000) / 1000
 }
 
-func UpdateMetrics(processingTime float64, fileSizeMB float64) (models.Metric, error) {
+func UpdateMetrics(tx *gorm.DB, processingTime float64, fileSizeMB float64) (models.Metric, error) {
 	var metric models.Metric
 	currentTime := time.Now()
-	result := database.DB.Preload("Words").First(&metric)
+
+	result := tx.Preload("Words").First(&metric)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -75,26 +76,33 @@ func UpdateMetrics(processingTime float64, fileSizeMB float64) (models.Metric, e
 				TotalFileSizeMB:              fileSizeMB,
 				AvgFileSizeMB:                fileSizeMB,
 			}
-			err := database.DB.Create(&metric).Error
-			return metric, err
+			if err := tx.Create(&metric).Error; err != nil {
+				return models.Metric{}, fmt.Errorf("failed to create metric: %w", err)
+			}
+			return metric, nil
 		}
-		return metric, result.Error
+		return models.Metric{}, fmt.Errorf("failed to get metric: %w", result.Error)
 	}
 
 	metric.FilesProcessed++
 	metric.LatestFileProcessedTimestamp = currentTime
 	metric.MinTimeProcessed = math.Min(metric.MinTimeProcessed, processingTime)
 	metric.MaxTimeProcessed = math.Max(metric.MaxTimeProcessed, processingTime)
+
 	totalTime := metric.AvgTimeProcessed * float64(metric.FilesProcessed-1)
 	metric.AvgTimeProcessed = (totalTime + processingTime) / float64(metric.FilesProcessed)
+
 	metric.TotalFileSizeMB += fileSizeMB
 	metric.AvgFileSizeMB = metric.TotalFileSizeMB / float64(metric.FilesProcessed)
 
-	err := database.DB.Save(&metric).Error
-	return metric, err
+	if err := tx.Save(&metric).Error; err != nil {
+		return models.Metric{}, fmt.Errorf("failed to update metric: %w", err)
+	}
+
+	return metric, nil
 }
 
-func SaveWords(words []string, metricID uint) error {
+func SaveWords(tx *gorm.DB, words []string, metricID uint) error {
 	wordCount := make(map[string]int)
 	for _, word := range words {
 		wordCount[word]++
@@ -106,11 +114,8 @@ func SaveWords(words []string, metricID uint) error {
 	}
 
 	var existingWords []models.Word
-	err := database.DB.
-		Where("word IN ? AND metric_id = ?", wordList, metricID).
-		Find(&existingWords).Error
-	if err != nil {
-		return err
+	if err := tx.Where("word IN ? AND metric_id = ?", wordList, metricID).Find(&existingWords).Error; err != nil {
+		return fmt.Errorf("failed to find existing words: %w", err)
 	}
 
 	existingWordMap := make(map[string]*models.Word)
@@ -118,12 +123,15 @@ func SaveWords(words []string, metricID uint) error {
 		existingWordMap[existingWords[i].Word] = &existingWords[i]
 	}
 
-	newWords := make([]models.Word, 0)
+	var wordsToUpdate []*models.Word
+	var wordsToCreate []models.Word
+
 	for word, count := range wordCount {
 		if existing, found := existingWordMap[word]; found {
 			existing.Count += count
+			wordsToUpdate = append(wordsToUpdate, existing)
 		} else {
-			newWords = append(newWords, models.Word{
+			wordsToCreate = append(wordsToCreate, models.Word{
 				MetricID:  metricID,
 				Word:      word,
 				Count:     count,
@@ -133,15 +141,17 @@ func SaveWords(words []string, metricID uint) error {
 		}
 	}
 
-	if len(existingWords) > 0 {
-		if err := database.DB.Save(&existingWords).Error; err != nil {
-			return err
+	// Обновляем существующие слова
+	if len(wordsToUpdate) > 0 {
+		if err := tx.Save(wordsToUpdate).Error; err != nil {
+			return fmt.Errorf("failed to update words: %w", err)
 		}
 	}
 
-	if len(newWords) > 0 {
-		if err := database.DB.Create(&newWords).Error; err != nil {
-			return err
+	// Создаем новые слова
+	if len(wordsToCreate) > 0 {
+		if err := tx.Create(&wordsToCreate).Error; err != nil {
+			return fmt.Errorf("failed to create words: %w", err)
 		}
 	}
 

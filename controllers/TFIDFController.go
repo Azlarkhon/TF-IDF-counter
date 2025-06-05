@@ -15,6 +15,7 @@ import (
 	"tfidf-app/services"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func ShowUploadForm(c *gin.Context) {
@@ -63,41 +64,50 @@ func HandleFileUpload(c *gin.Context) {
 		return
 	}
 
-	// Сохраняем метаинформацию в БД
-	document := models.Document{
-		Name:     file.Filename,
-		FilePath: filePath,
-		UserID:   userID,
-	}
-
-	if err := database.DB.Create(&document).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to save document: "+err.Error()))
-		return
-	}
-
+	// Обработка файла (вынесено до транзакции, так как это CPU-bound операция)
 	words, err := processFile(filePath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot process file: "+err.Error()))
 		return
 	}
 
-	processingTime := services.CalculateProcessingTime(startTime)
-	fileSizeMB := services.RoundFileSizeMB(file.Size)
+	// Начинаем транзакцию для всех операций с БД
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		// Сохраняем метаинформацию в БД
+		document := models.Document{
+			Name:     file.Filename,
+			FilePath: filePath,
+			UserID:   userID,
+		}
+		if err := tx.Create(&document).Error; err != nil {
+			return fmt.Errorf("failed to save document: %w", err)
+		}
 
-	stats := services.ComputeTFIDF(words)
+		// Вычисляем метрики
+		processingTime := services.CalculateProcessingTime(startTime)
+		fileSizeMB := services.RoundFileSizeMB(file.Size)
 
-	metric, err := services.UpdateMetrics(processingTime, fileSizeMB)
+		// Обновляем метрики
+		metric, err := services.UpdateMetrics(tx, processingTime, fileSizeMB)
+		if err != nil {
+			return fmt.Errorf("failed to update metrics: %w", err)
+		}
+
+		// Сохраняем слова
+		if err := services.SaveWords(tx, words, metric.ID); err != nil {
+			return fmt.Errorf("failed to save words: %w", err)
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error: "+err.Error()))
 		return
 	}
 
-	err = services.SaveWords(words, metric.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error saving words: "+err.Error()))
-		return
-	}
-
+	// TF-IDF (не требует транзакции, так как это вычисление)
+	stats := services.ComputeTFIDF(words)
 	if len(stats) > 50 {
 		stats = stats[:50]
 	}
