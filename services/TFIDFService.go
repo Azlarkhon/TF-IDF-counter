@@ -4,7 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os"
+	"regexp"
 	"sort"
+	"strings"
 	"tfidf-app/models"
 	"time"
 
@@ -156,4 +159,19 @@ func SaveWords(tx *gorm.DB, words []string, metricID uint) error {
 	}
 
 	return nil
+}
+
+func ProcessFile(filePath string) ([]string, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	text := string(data)
+	text = strings.ToLower(text)
+
+	reg := regexp.MustCompile(`[^a-zA-Zа-яА-Я]+`)
+	cleaned := reg.ReplaceAllString(text, " ")
+
+	words := strings.Fields(cleaned)
+	return words, nil
 }
