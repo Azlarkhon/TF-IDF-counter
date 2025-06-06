@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
 	"tfidf-app/database"
@@ -30,6 +28,11 @@ func HandleFileUpload(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("Unauthorized"))
+		return
+	}
+
+	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
+	if !authorized {
 		return
 	}
 
@@ -65,7 +68,7 @@ func HandleFileUpload(c *gin.Context) {
 	}
 
 	// Обработка файла (вынесено до транзакции, так как это CPU-bound операция)
-	words, err := processFile(filePath)
+	words, err := services.ProcessFile(filePath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot process file: "+err.Error()))
 		return
@@ -115,19 +118,4 @@ func HandleFileUpload(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"words": stats,
 	})
-}
-
-func processFile(filePath string) ([]string, error) {
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-	text := string(data)
-	text = strings.ToLower(text)
-
-	reg := regexp.MustCompile(`[^a-zA-Zа-яА-Я]+`)
-	cleaned := reg.ReplaceAllString(text, " ")
-
-	words := strings.Fields(cleaned)
-	return words, nil
 }
