@@ -14,5 +14,6 @@ func DocumentRoute(r *gin.Engine) {
 		protected.GET("/", controllers.GetDocuments)
 		protected.GET("/:document_id", controllers.GetDocumentByID)
 		protected.DELETE("/:document_id", controllers.DeleteDocument)
+		protected.GET("/:document_id/statistics", controllers.GetDocumentStatistics)
 	}
 }
