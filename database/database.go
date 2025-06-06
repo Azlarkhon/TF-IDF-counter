@@ -34,8 +34,6 @@ func migrate() {
 		&models.User{},
 		&models.Document{},
 		&models.Collection{},
-		&models.TermFrequency{},
-		&models.InverseDocumentFrequency{},
 		&models.CollectionDocument{},
 	)
 	if err != nil {
