@@ -10,14 +10,6 @@ import (
 	"tfidf-app/models"
 )
 
-type WordStatForUpload struct {
-	Word  string
-	TF    float64
-	Count int
-	IDF   float64
-	TFIDF float64
-}
-
 type WordStat struct {
 	Word  string
 	TF    float64
@@ -25,26 +17,22 @@ type WordStat struct {
 	IDF   float64
 }
 
-func ComputeTFIDFForUpload(words []string) []WordStatForUpload {
-	wordCount := make(map[string]int)
-	for _, w := range words {
-		wordCount[w]++
-	}
+func ComputeTFIDFForUpload(words []string) []WordStat {
+	wordCount := CountWords(words)
 
 	totalWords := len(words)
 
-	stats := make([]WordStatForUpload, 0, len(wordCount))
+	stats := make([]WordStat, 0, len(wordCount))
 	for w, count := range wordCount {
 		tf := float64(count) / float64(totalWords)
 
 		idf := math.Log(float64(totalWords) / float64(count))
 
-		stats = append(stats, WordStatForUpload{
+		stats = append(stats, WordStat{
 			Word:  w,
 			TF:    tf,
 			Count: count,
 			IDF:   idf,
-			TFIDF: tf * idf,
 		})
 	}
 
