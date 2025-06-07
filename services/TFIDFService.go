@@ -92,7 +92,6 @@ func CountWords(words []string) map[string]int {
 	return wordCount
 }
 
-// CalculateTF вычисляет Term Frequency
 func CalculateTF(wordCount map[string]int, totalWords int) map[string]float64 {
 	tf := make(map[string]float64)
 	for word, count := range wordCount {
