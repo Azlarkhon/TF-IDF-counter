@@ -74,7 +74,7 @@ func GetAllCollectionDocuments(documentID uint, collections []*models.Collection
 		}
 
 		for _, doc := range docs {
-			if doc.ID != documentID && !seenDocs[doc.ID] {
+			if !seenDocs[doc.ID] {
 				allDocs = append(allDocs, doc)
 				seenDocs[doc.ID] = true
 			}
