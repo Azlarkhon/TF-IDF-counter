@@ -18,7 +18,7 @@ type WordStat struct {
 	TFIDF float64
 }
 
-func ComputeTFIDF(words []string) []WordStat {
+func ComputeTFIDFForUpload(words []string) []WordStat {
 	wordCount := make(map[string]int)
 	for _, w := range words {
 		wordCount[w]++

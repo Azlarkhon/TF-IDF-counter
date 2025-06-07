@@ -110,7 +110,7 @@ func HandleFileUpload(c *gin.Context) {
 	}
 
 	// TF-IDF (не требует транзакции, так как это вычисление)
-	stats := services.ComputeTFIDF(words)
+	stats := services.ComputeTFIDFForUpload(words)
 	if len(stats) > 50 {
 		stats = stats[:50]
 	}
