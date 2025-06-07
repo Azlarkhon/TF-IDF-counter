@@ -101,11 +101,10 @@ func CalculateTF(wordCount map[string]int, totalWords int) map[string]float64 {
 	return tf
 }
 
-// CalculateIDF вычисляет Inverse Document Frequency
 func CalculateIDF(documents []map[string]int) map[string]float64 {
 	idf := make(map[string]float64)
 	totalDocs := len(documents)
-	docFrequency := make(map[string]int)
+	docFrequency := make(map[string]int) // Сколько документов содержат каждое слово
 
 	for _, doc := range documents {
 		for word := range doc {
@@ -120,7 +119,6 @@ func CalculateIDF(documents []map[string]int) map[string]float64 {
 	return idf
 }
 
-// CalculateTFIDF вычисляет TF-IDF
 func CalculateTFIDF(tf map[string]float64, idf map[string]float64) map[string]float64 {
 	tfidf := make(map[string]float64)
 
