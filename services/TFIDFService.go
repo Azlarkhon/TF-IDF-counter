@@ -10,7 +10,7 @@ import (
 	"tfidf-app/models"
 )
 
-type WordStat struct {
+type WordStatForUpload struct {
 	Word  string
 	TF    float64
 	Count int
@@ -18,7 +18,14 @@ type WordStat struct {
 	TFIDF float64
 }
 
-func ComputeTFIDFForUpload(words []string) []WordStat {
+type WordStat struct {
+	Word  string
+	TF    float64
+	Count int
+	IDF   float64
+}
+
+func ComputeTFIDFForUpload(words []string) []WordStatForUpload {
 	wordCount := make(map[string]int)
 	for _, w := range words {
 		wordCount[w]++
@@ -26,13 +33,13 @@ func ComputeTFIDFForUpload(words []string) []WordStat {
 
 	totalWords := len(words)
 
-	stats := make([]WordStat, 0, len(wordCount))
+	stats := make([]WordStatForUpload, 0, len(wordCount))
 	for w, count := range wordCount {
 		tf := float64(count) / float64(totalWords)
 
 		idf := math.Log(float64(totalWords) / float64(count))
 
-		stats = append(stats, WordStat{
+		stats = append(stats, WordStatForUpload{
 			Word:  w,
 			TF:    tf,
 			Count: count,
@@ -94,6 +101,11 @@ func CountWords(words []string) map[string]int {
 
 func CalculateTF(wordCount map[string]int, totalWords int) map[string]float64 {
 	tf := make(map[string]float64)
+
+	if totalWords == 0 {
+		return tf
+	}
+
 	for word, count := range wordCount {
 		tf[word] = float64(count) / float64(totalWords)
 	}
@@ -112,43 +124,29 @@ func CalculateIDF(documents []map[string]int) map[string]float64 {
 	}
 
 	for word, freq := range docFrequency {
-		idf[word] = math.Log(float64(totalDocs) / float64(freq))
+		if freq == 0 {
+			idf[word] = 0
+		} else {
+			idf[word] = math.Log(float64(totalDocs) / float64(freq))
+		}
 	}
 
 	return idf
 }
 
-func CalculateTFIDF(tf map[string]float64, idf map[string]float64) map[string]float64 {
-	tfidf := make(map[string]float64)
-
-	for word, tfValue := range tf {
-		if idfValue, exists := idf[word]; exists {
-			tfidf[word] = tfValue * idfValue
-		} else {
-			tfidf[word] = tfValue * math.Log(float64(len(idf)+1))
-		}
-	}
-
-	return tfidf
-}
-
-func GetRarestWords(tfidf map[string]float64, wordCount map[string]int, limit int) []WordStat {
+func GetRarestWords(wordCount map[string]int, limit int) []WordStat {
 	var stats []WordStat
-	for word, tfidfValue := range tfidf {
+	for word, count := range wordCount {
 		stats = append(stats, WordStat{
 			Word:  word,
-			TFIDF: tfidfValue,
-			Count: wordCount[word],
+			Count: count,
 		})
 	}
-
 	sort.Slice(stats, func(i, j int) bool {
-		return stats[i].TFIDF < stats[j].TFIDF
+		return stats[i].Count < stats[j].Count
 	})
-
 	if len(stats) > limit {
 		stats = stats[:limit]
 	}
-
 	return stats
 }

@@ -185,10 +185,8 @@ func GetDocumentStatistics(c *gin.Context) {
 
 		// Расчет статистики
 		idf := services.CalculateIDF(collectionWords)
-		tfidf := services.CalculateTFIDF(tf, idf)
-		rareWords := services.GetRarestWords(tfidf, wordCount, 50)
+		rareWords := services.GetRarestWords(wordCount, 50)
 
-		// Заполняем TF, Count и IDF для каждого слова
 		for i := range rareWords {
 			rareWords[i].TF = tf[rareWords[i].Word]
 			if idfValue, exists := idf[rareWords[i].Word]; exists {
@@ -217,7 +215,6 @@ func GetDocumentStatistics(c *gin.Context) {
 			TF:    tfValue,
 			Count: wordCount[word],
 			IDF:   0,
-			TFIDF: tfValue,
 		})
 	}
 
