@@ -63,7 +63,7 @@ func ProcessFile(filePath string) ([]string, error) {
 	return words, nil
 }
 
-func GetAllCollectionDocuments(documentID uint, collections []*models.Collection) ([]models.Document, error) {
+func GetAllCollectionDocuments(collections []*models.Collection) ([]models.Document, error) {
 	var allDocs []models.Document
 	seenDocs := make(map[uint]bool)
 

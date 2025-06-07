@@ -72,3 +72,5 @@
 172.18.0.1 - - [07/Jun/2025:04:07:42 +0000] "GET /documents/4/statistics HTTP/1.1" 200 3717 "-" "PostmanRuntime/7.44.0"
 172.18.0.1 - - [07/Jun/2025:04:07:44 +0000] "GET /documents/4/statistics HTTP/1.1" 200 3710 "-" "PostmanRuntime/7.44.0"
 172.18.0.1 - - [07/Jun/2025:04:07:45 +0000] "GET /documents/4/statistics HTTP/1.1" 200 3688 "-" "PostmanRuntime/7.44.0"
+172.18.0.1 - - [07/Jun/2025:04:11:07 +0000] "GET / HTTP/1.1" 200 22507 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+172.18.0.1 - - [07/Jun/2025:04:11:12 +0000] "GET /documents/4/statistics HTTP/1.1" 200 3710 "-" "PostmanRuntime/7.44.0"

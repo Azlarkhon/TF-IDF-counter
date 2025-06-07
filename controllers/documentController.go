@@ -165,7 +165,7 @@ func GetDocumentStatistics(c *gin.Context) {
 
 	// 5. Обработка случая с коллекциями
 	if len(document.Collections) > 0 {
-		allDocs, err := services.GetAllCollectionDocuments(document.ID, document.Collections)
+		allDocs, err := services.GetAllCollectionDocuments(document.Collections)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get collection documents"))
 			return
