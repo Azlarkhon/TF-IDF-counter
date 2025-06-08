@@ -22,6 +22,7 @@
 * API для пользователей (login, register, logout, updatePassword, delete user)
 * API для документов и коллекций (crud и указанные в тз)
 * Volume для хранения документов (user_id/document)
+* GET /documents/:document_id/statistics — дает стату так, словно все документы из всех коллекций(где находится document_id)) находятся в одной коллекции.
 
 ### Changed
 
