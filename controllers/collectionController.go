@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"math"
 	"net/http"
 	"tfidf-app/database"
 	"tfidf-app/dto"
 	"tfidf-app/helper"
 	"tfidf-app/models"
+	"tfidf-app/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -299,4 +301,69 @@ func DeleteCollection(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
+}
+
+func GetCollectionStatistics(c *gin.Context) {
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
+		return
+	}
+
+	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
+	if !authorized {
+		return
+	}
+
+	collectionID := c.Param("collection_id")
+	if collectionID == "" {
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Collection ID is required"))
+		return
+	}
+
+	var collection models.Collection
+	if err := database.DB.Preload("Documents").Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get collection"))
+		return
+	}
+
+	var collectionDocuments []map[string]int
+	var tfWords []string
+	for _, doc := range collection.Documents {
+		words, err := services.ProcessFile(doc.FilePath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Cannot process file: "+err.Error()))
+			return
+		}
+		collectionDocuments = append(collectionDocuments, services.CountWords(words))
+		tfWords = append(tfWords, words...)
+	}
+
+	wordCount := services.CountWords(tfWords)
+	tf := services.CalculateTF(wordCount, len(tfWords))
+
+	idf := services.CalculateIDF(collectionDocuments)
+
+	rareWords := services.GetRarestWords(wordCount, 50)
+
+	for i := range rareWords {
+		rareWords[i].TF = tf[rareWords[i].Word]
+		if idfValue, exists := idf[rareWords[i].Word]; exists {
+			rareWords[i].IDF = idfValue
+		} else {
+			rareWords[i].IDF = math.Log(float64(len(collectionDocuments) + 1))
+		}
+		rareWords[i].Count = wordCount[rareWords[i].Word]
+	}
+
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
+		"statistics": rareWords,
+		"meta": gin.H{
+			"total_documents": len(collection.Documents),
+		},
+	}))
 }

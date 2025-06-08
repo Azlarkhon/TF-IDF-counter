@@ -19,5 +19,6 @@ func CollectionRoute(r *gin.Engine) {
 		protected.POST("/:collection_id/:document_id", controllers.AddDocumentToCollection)
 		protected.DELETE("/:collection_id/:document_id", controllers.DeleteDocumentFromCollection)
 		protected.POST("/add-many", controllers.AddDocumentToCollections)
+		protected.GET("/:collection_id/statistics", controllers.GetCollectionStatistics)
 	}
 }
