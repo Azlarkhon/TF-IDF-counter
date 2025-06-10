@@ -24,45 +24,79 @@
 
 ```text
 .
-├── .env                      # Переменные окружения
-├── CHANGELOG.md              # История изменений
-├── compose.yaml              # Docker Compose
-├── Dockerfile                # Сборка Docker
-├── go.mod                    # Зависимости Go
-├── go.sum                    # Контрольные суммы
-├── main.go                   # Точка входа
-├── README.md                 # Документация
+├── .env                              # Переменные окружения
+├── .env.example                      # Пример переменных окружения
+├── .gitignore                        # Файлы и папки для игнорирования Git'ом
+├── CHANGELOG.md                      # История изменений проекта
+├── compose.yaml                      # Конфигурация Docker Compose
+├── DB-DIAGRAM.md                     # Диаграмма базы данных
+├── Dockerfile                        # Инструкции для сборки Docker-образа
+├── go.mod                            # Модуль Go: зависимости и версия
+├── go.sum                            # Контрольные суммы зависимостей Go
+├── main.go                           # Главный файл приложения, точка входа
+├── README.md                         # Основная документация проекта
 │
-├── config/
-│   └── init.go               # Инициализация конфигурации
+├── config/                           # Настройки и конфигурация приложения
+│   └── init.go                       # Инициализация конфигурации
 │
-├── controllers/
-│   ├── TFIDFController.go    # Обработка TF-IDF
-│   └── systemParametersController.go # Параметры системы
+├── controllers/                      # Обработчики HTTP-запросов (контроллеры)
+│   ├── collectionController.go       # Контроллер для работы с коллекциями
+│   ├── documentController.go         # Контроллер для работы с документами
+│   ├── metricsController.go          # Контроллер для получения метрик
+│   ├── TFIDFController.go            # Контроллер для TF-IDF операций
+│   └── userController.go             # Контроллер для работы с пользователями
 │
-├── database/
-│   └── database.go           # Подключение к БД
+├── database/                         # Управление подключением к базе данных
+│   └── database.go                   # Логика подключения к БД
 │
-├── helper/
-│   └── responseBuilder.go    # Формирование ответов
+├── docs/                             # Документация API (Swagger/OpenAPI)
+│   ├── docs.go                       # Исходный файл для генерации Swagger
+│   ├── swagger.json                  # Сгенерированный JSON-файл Swagger
+│   └── swagger.yaml                  # Сгенерированный YAML-файл Swagger
 │
-├── models/
-│   └── systemParametersModel.go # Модель данных
+├── dto/                              # Объекты передачи данных (Data Transfer Objects)
+│   ├── collection.go                 # DTO для коллекций
+│   ├── document.go                   # DTO для документов
+│   └── users.go                      # DTO для пользователей
 │
-├── routes/
-│   └── route.go              # Маршрутизация
+├── helper/                           # Вспомогательные функции и утилиты
+│   ├── jwt.go                        # Функции для работы с JWT
+│   └── responseBuilder.go            # Функции для построения стандартных HTTP-ответов
 │
-├── samples/
-│   └── sample.txt            # Пример файла
+├── image/                            # Изображения, используемые в документации или проекте
+│   └── DB-DIAGRAM/                   # Папка для диаграмм БД
+│       └── 1749549643575.png         # Изображение диаграммы БД
 │
-├── services/
-│   └── TFIDFService.go       # Логика TF-IDF
+├── middleware/                       # Промежуточное ПО для обработки запросов
+│   └── authMiddleware.go             # Промежуточное ПО для аутентификации
 │
-├── templates/
-│   └── index.tmpl            # HTML шаблон
+├── models/                           # Структуры данных для работы с БД (модели)
+│   ├── collectionModel.go            # Модель данных для коллекций
+│   ├── documentModel.go              # Модель данных для документов
+│   ├── metricsModel.go               # Модель данных для метрик
+│   └── userModel.go                  # Модель данных для пользователей
 │
-└── version/
-    └── version.go            # Информация о версии
+├── nginx/                            # Конфигурация Nginx
+│   ├── nginx.conf                    # Основной конфигурационный файл Nginx
+│   └── logs/                         # Логи Nginx
+│       ├── access.log                # Лог доступа Nginx
+│       └── error.log                 # Лог ошибок Nginx
+│
+├── routes/                           # Определение маршрутов API
+│   ├── collectionRoute.go            # Маршруты для коллекций
+│   ├── documentRoute.go              # Маршруты для документов
+│   ├── route.go                      # Главный файл с определением маршрутов
+│   └── userRoute.go                  # Маршруты для пользователей
+│
+├── services/                         # Бизнес-логика приложения (сервисы)
+│   ├── metricsService.go             # Сервис для работы с метриками
+│   └── TFIDFService.go               # Сервис для вычисления TF-IDF
+│
+├── templates/                        # HTML-шаблоны
+│   └── index.tmpl                    # Шаблон для главной страницы
+│
+└── version/                          # Информация о версии приложения
+    └── version.go                    # Файл с номером версии приложения
 ```
 
 ## Начало работы
@@ -84,7 +118,7 @@ cd TF-IDF-counter
    ```
    docker-compose up --build
    ```
-4. Приложение будет доступно по адресу: [http://localhost](http://localhost:8080)
+4. Приложение будет доступно по адресу: [http://localhost](http://localhost). В [http://localhost/swagger/index.html](http://localhost/swagger/index.html) находится swagger ui где можете посмотреть документацию по api и протестировать ее.
 
 ## Использование
 
