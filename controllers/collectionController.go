@@ -13,6 +13,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// CreateCollection godoc
+// @Summary Create a new collection
+// @Description Creates a new document collection
+// @Tags Collections
+// @Accept json
+// @Produce json
+// @Param collection body dto.CreateCollectionReq true "Collection details"
+// @Success 201 {object} helper.Response{data=models.Collection} "Created collection"
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections [post]
 func CreateCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -44,6 +56,19 @@ func CreateCollection(c *gin.Context) {
 	c.JSON(http.StatusCreated, helper.NewSuccessResponse(collection))
 }
 
+// AddDocumentToCollection godoc
+// @Summary Add document to collection
+// @Description Adds an existing document to a collection
+// @Tags Collections
+// @Produce json
+// @Param collection_id path string true "Collection ID"
+// @Param document_id path string true "Document ID"
+// @Success 200 {object} helper.Response
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections/{collection_id}/{document_id} [post]
 func AddDocumentToCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -86,6 +111,21 @@ func AddDocumentToCollection(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse("Document successfully added to collection"))
 }
 
+
+// AddDocumentToCollections godoc
+// @Summary Add document to multiple collections
+// @Description Adds a document to several collections at once
+// @Tags Collections
+// @Accept json
+// @Produce json
+// @Param document_id path string true "Document ID"
+// @Param request body dto.AddDocumentToCollectionsReq true "Collection IDs"
+// @Success 200 {object} helper.Response
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections/add-many [post]
 func AddDocumentToCollections(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -137,6 +177,19 @@ func AddDocumentToCollections(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse("Document successfully added to all specified collections"))
 }
 
+// DeleteDocumentFromCollection godoc
+// @Summary Remove document from collection
+// @Description Removes a document from a collection
+// @Tags Collections
+// @Produce json
+// @Param collection_id path string true "Collection ID"
+// @Param document_id path string true "Document ID"
+// @Success 200 {object} helper.Response
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections/{collection_id}/{document_id} [delete]
 func DeleteDocumentFromCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -176,6 +229,15 @@ func DeleteDocumentFromCollection(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
 }
 
+// GetCollections godoc
+// @Summary Get all collections
+// @Description Returns all collections belonging to the authenticated user
+// @Tags Collections
+// @Produce json
+// @Success 200 {object} helper.Response{data=[]models.Collection} "List of collections"
+// @Failure 401 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections [get]
 func GetCollections(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -197,6 +259,18 @@ func GetCollections(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(collections))
 }
 
+// GetCollectionByID godoc
+// @Summary Get collection by ID
+// @Description Returns a specific collection with its documents
+// @Tags Collections
+// @Produce json
+// @Param collection_id path string true "Collection ID"
+// @Success 200 {object} helper.Response{data=models.Collection} "Collection details"
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections/{collection_id} [get]
 func GetCollectionByID(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -224,6 +298,20 @@ func GetCollectionByID(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(collection))
 }
 
+// UpdateCollection godoc
+// @Summary Update collection
+// @Description Updates collection name
+// @Tags Collections
+// @Accept json
+// @Produce json
+// @Param collection_id path string true "Collection ID"
+// @Param collection body dto.UpdateCollectionReq true "New collection name"
+// @Success 200 {object} helper.Response{data=models.Collection} "Updated collection"
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections/{collection_id} [put]
 func UpdateCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -267,6 +355,18 @@ func UpdateCollection(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(collection))
 }
 
+// DeleteCollection godoc
+// @Summary Delete collection
+// @Description Deletes a collection (does not delete documents)
+// @Tags Collections
+// @Produce json
+// @Param collection_id path string true "Collection ID"
+// @Success 200 {object} helper.Response
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections/{collection_id} [delete]
 func DeleteCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -303,6 +403,18 @@ func DeleteCollection(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
 }
 
+// GetCollectionStatistics godoc
+// @Summary Get collection statistics
+// @Description Returns TF-IDF statistics for all documents in a collection
+// @Tags Collections
+// @Produce json
+// @Param collection_id path string true "Collection ID"
+// @Success 200 {object} helper.Response{data=object} "Collection statistics"
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /collections/{collection_id}/statistics [get]
 func GetCollectionStatistics(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {

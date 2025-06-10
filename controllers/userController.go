@@ -16,6 +16,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// GetMe godoc
+// @Summary Получить информацию о текущем пользователе
+// @Tags Users
+// @Success 200 {object} helper.Response{data=models.User}
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /users/me [get]
 func GetMe(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -43,6 +51,16 @@ func GetMe(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(me))
 }
 
+// Register godoc
+// @Summary Регистрация нового пользователя
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param user body dto.RegisterUserRequest true "Регистрационные данные"
+// @Success 200 {object} helper.Response{data=models.User}
+// @Failure 400 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /users/register [post]
 func Register(c *gin.Context) {
 	var req dto.RegisterUserRequest
 
@@ -79,6 +97,17 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(newUser))
 }
 
+// Login godoc
+// @Summary Вход пользователя и установка JWT куки
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param credentials body dto.LoginRequest true "Данные для входа"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /users/login [post]
 func Login(c *gin.Context) {
 	var req dto.LoginRequest
 	err := c.BindJSON(&req)
@@ -122,10 +151,17 @@ func Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":         user.ID,
+		"token":      token,
 		"is_success": true,
 	})
 }
 
+// Logout godoc
+// @Summary Выход пользователя (удаление куки)
+// @Tags Users
+// @Produce json
+// @Success 200 {object} helper.Response
+// @Router /users/logout [get]
 func Logout(c *gin.Context) {
 	c.SetCookie(
 		"auth_token",
@@ -139,6 +175,18 @@ func Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
 }
 
+// UpdateUser godoc
+// @Summary Обновить пароль пользователя
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param user_id path int true "ID пользователя"
+// @Param update body dto.UpdateUserRequest true "Новый пароль"
+// @Success 200 {object} helper.Response
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /users/{user_id} [patch]
 func UpdateUser(c *gin.Context) {
 	idStr := c.Param("user_id")
 	id, err := strconv.Atoi(idStr)
@@ -174,6 +222,16 @@ func UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse("Password updated successfully"))
 }
 
+// DeleteUser godoc
+// @Summary Удалить пользователя и его папку
+// @Tags Users
+// @Produce json
+// @Param user_id path int true "ID пользователя"
+// @Success 200 {object} helper.Response
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /users/{user_id} [delete]
 func DeleteUser(c *gin.Context) {
 	idStr := c.Param("user_id")
 	id, err := strconv.Atoi(idStr)

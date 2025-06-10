@@ -16,6 +16,15 @@ import (
 	"gorm.io/gorm"
 )
 
+// GetDocuments godoc
+// @Summary Get all user documents
+// @Description Returns a list of all documents belonging to the authenticated user
+// @Tags Documents
+// @Produce json
+// @Success 200 {object} helper.Response{data=[]models.Document} "List of documents"
+// @Failure 401 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /documents [get]
 func GetDocuments(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -37,6 +46,19 @@ func GetDocuments(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(documents))
 }
 
+// GetDocumentByID godoc
+// @Summary Get a specific document
+// @Description Returns document details and content by ID
+// @Tags Documents
+// @Produce json
+// @Param document_id path string true "Document ID"
+// @Success 200 {object} helper.Response{data=dto.DocumentResponse} "Document details"
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 403 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /documents/{document_id} [get]
 func GetDocumentByID(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -82,6 +104,18 @@ func GetDocumentByID(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(response))
 }
 
+// DeleteDocument godoc
+// @Summary Delete a document
+// @Description Deletes a document by ID (both file and database record)
+// @Tags Documents
+// @Produce json
+// @Param document_id path string true "Document ID"
+// @Success 200 {object} helper.Response
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /documents/{document_id} [delete]
 func DeleteDocument(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
@@ -125,6 +159,18 @@ func DeleteDocument(c *gin.Context) {
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
 }
 
+// GetDocumentStatistics godoc
+// @Summary Get document statistics
+// @Description Returns TF-IDF statistics for a document
+// @Tags Documents
+// @Produce json
+// @Param document_id path string true "Document ID"
+// @Success 200 {object} helper.Response{data=object} "Document statistics"
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /documents/{document_id}/statistics [get]
 func GetDocumentStatistics(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {

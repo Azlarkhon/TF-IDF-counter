@@ -1,5 +1,6 @@
 package helper
 
+// @Description This is the standard response format for all API endpoints
 type Response struct {
 	Data      any    `json:"data,omitempty"`
 	Error     string `json:"error,omitempty"`

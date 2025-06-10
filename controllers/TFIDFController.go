@@ -22,6 +22,19 @@ func ShowUploadForm(c *gin.Context) {
 	})
 }
 
+// HandleFileUpload godoc
+// @Summary Upload and process a document
+// @Description Uploads a file, processes it for TF-IDF, and saves to database
+// @Tags Documents
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "Document file to upload"
+// @Success 200 {object} helper.Response{data=[]services.WordStat} "TF-IDF statistics"
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 409 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /upload [post]
 func HandleFileUpload(c *gin.Context) {
 	startTime := time.Now()
 

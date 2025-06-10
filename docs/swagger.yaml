@@ -1,0 +1,950 @@
+basePath: /
+definitions:
+  dto.AddDocumentToCollectionsReq:
+    properties:
+      collection_ids:
+        items:
+          type: integer
+        type: array
+      document_id:
+        type: integer
+    required:
+    - collection_ids
+    - document_id
+    type: object
+  dto.CreateCollectionReq:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.DocumentResponse:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      uploaded_at:
+        type: string
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.RegisterUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.UpdateCollectionReq:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  dto.UpdateUserRequest:
+    properties:
+      password:
+        type: string
+    type: object
+  helper.Response:
+    description: This is the standard response format for all API endpoints
+    properties:
+      data:
+        description: Data contains the successful response payload (optional)
+      error:
+        description: Error contains error message if the request failed (optional)
+        type: string
+      is_success:
+        description: IsSuccess indicates whether the request was successful
+        type: boolean
+    type: object
+  models.Collection:
+    properties:
+      created_at:
+        type: string
+      documents:
+        items:
+          $ref: '#/definitions/models.Document'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.Document:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        description: имя файла или произвольное название
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.Metric:
+    properties:
+      avg_file_size_mb:
+        type: number
+      avg_time_processed:
+        type: number
+      files_processed:
+        type: integer
+      id:
+        type: integer
+      latest_file_processed_timestamp:
+        type: string
+      max_time_processed:
+        type: number
+      min_time_processed:
+        type: number
+      top_10_most_freq_words:
+        items:
+          $ref: '#/definitions/models.Word'
+        type: array
+      total_file_size_mb:
+        type: number
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Word:
+    properties:
+      count:
+        type: integer
+      word:
+        type: string
+    type: object
+  services.WordStat:
+    properties:
+      count:
+        type: integer
+      idf:
+        type: number
+      tf:
+        type: number
+      word:
+        type: string
+    type: object
+host: localhost
+info:
+  contact: {}
+  description: API for document processing using TF-IDF algorithm
+  title: TF-IDF counter API
+  version: 1.2.0
+paths:
+  /collections:
+    get:
+      description: Returns all collections belonging to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of collections
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Collection'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Get all collections
+      tags:
+      - Collections
+    post:
+      consumes:
+      - application/json
+      description: Creates a new document collection
+      parameters:
+      - description: Collection details
+        in: body
+        name: collection
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCollectionReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created collection
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Collection'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Create a new collection
+      tags:
+      - Collections
+  /collections/{collection_id}:
+    delete:
+      description: Deletes a collection (does not delete documents)
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Delete collection
+      tags:
+      - Collections
+    get:
+      description: Returns a specific collection with its documents
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Collection details
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Collection'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Get collection by ID
+      tags:
+      - Collections
+    put:
+      consumes:
+      - application/json
+      description: Updates collection name
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        type: string
+      - description: New collection name
+        in: body
+        name: collection
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCollectionReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated collection
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Collection'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Update collection
+      tags:
+      - Collections
+  /collections/{collection_id}/{document_id}:
+    delete:
+      description: Removes a document from a collection
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        type: string
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Remove document from collection
+      tags:
+      - Collections
+    post:
+      description: Adds an existing document to a collection
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        type: string
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Add document to collection
+      tags:
+      - Collections
+  /collections/{collection_id}/statistics:
+    get:
+      description: Returns TF-IDF statistics for all documents in a collection
+      parameters:
+      - description: Collection ID
+        in: path
+        name: collection_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Collection statistics
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Get collection statistics
+      tags:
+      - Collections
+  /collections/add-many:
+    post:
+      consumes:
+      - application/json
+      description: Adds a document to several collections at once
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        type: string
+      - description: Collection IDs
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddDocumentToCollectionsReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Add document to multiple collections
+      tags:
+      - Collections
+  /documents:
+    get:
+      description: Returns a list of all documents belonging to the authenticated
+        user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of documents
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Document'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Get all user documents
+      tags:
+      - Documents
+  /documents/{document_id}:
+    delete:
+      description: Deletes a document by ID (both file and database record)
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Delete a document
+      tags:
+      - Documents
+    get:
+      description: Returns document details and content by ID
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Document details
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DocumentResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Get a specific document
+      tags:
+      - Documents
+  /documents/{document_id}/statistics:
+    get:
+      description: Returns TF-IDF statistics for a document
+      parameters:
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Document statistics
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Get document statistics
+      tags:
+      - Documents
+  /metrics:
+    get:
+      description: Retrieves aggregated metrics including processing time, file size,
+        and top words.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application metrics
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Metric'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Get application metrics
+      tags:
+      - Metrics
+  /status:
+    get:
+      description: Provides the current status of the API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API status
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  properties:
+                    status:
+                      type: string
+                  type: object
+              type: object
+      summary: Get API status
+      tags:
+      - Health
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file, processes it for TF-IDF, and saves to database
+      parameters:
+      - description: Document file to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: TF-IDF statistics
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/services.WordStat'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Upload and process a document
+      tags:
+      - Documents
+  /users/{user_id}:
+    delete:
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Удалить пользователя и его папку
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Новый пароль
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Обновить пароль пользователя
+      tags:
+      - Users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Вход пользователя и установка JWT куки
+      tags:
+      - Users
+  /users/logout:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Выход пользователя (удаление куки)
+      tags:
+      - Users
+  /users/me:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Получить информацию о текущем пользователе
+      tags:
+      - Users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Регистрационные данные
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Регистрация нового пользователя
+      tags:
+      - Users
+  /version:
+    get:
+      description: Provides the current version of the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application version
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  properties:
+                    version:
+                      type: string
+                  type: object
+              type: object
+      summary: Get application version
+      tags:
+      - Health
+swagger: "2.0"
