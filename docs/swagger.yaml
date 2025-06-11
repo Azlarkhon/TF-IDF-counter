@@ -474,11 +474,6 @@ paths:
       - application/json
       description: Adds a document to several collections at once
       parameters:
-      - description: Document ID
-        in: path
-        name: document_id
-        required: true
-        type: string
       - description: Collection IDs
         in: body
         name: request

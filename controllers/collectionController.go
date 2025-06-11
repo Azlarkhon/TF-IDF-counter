@@ -118,7 +118,6 @@ func AddDocumentToCollection(c *gin.Context) {
 // @Tags Collections
 // @Accept json
 // @Produce json
-// @Param document_id path string true "Document ID"
 // @Param request body dto.AddDocumentToCollectionsReq true "Collection IDs"
 // @Success 200 {object} helper.Response
 // @Failure 400 {object} helper.Response

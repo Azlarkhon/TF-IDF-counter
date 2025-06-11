@@ -139,13 +139,6 @@ const docTemplate = `{
                 "summary": "Add document to multiple collections",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Document ID",
-                        "name": "document_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "Collection IDs",
                         "name": "request",
                         "in": "body",
