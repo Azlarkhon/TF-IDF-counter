@@ -382,7 +382,7 @@ const docTemplate = `{
         },
         "/collections/{collection_id}/statistics": {
             "get": {
-                "description": "Returns TF-IDF statistics for all documents in a collection",
+                "description": "Gets statistics for the collection: TF is calculated as if all documents in the collection were one document, IDF unchanged",
                 "produces": [
                     "application/json"
                 ],
@@ -734,7 +734,7 @@ const docTemplate = `{
         },
         "/documents/{document_id}/statistics": {
             "get": {
-                "description": "Returns TF-IDF statistics for a document",
+                "description": "Calculates TF statistics for a given document, and IDF calculated as if all documents in collections, where the document we specified is, is in one collection",
                 "produces": [
                     "application/json"
                 ],
@@ -799,7 +799,7 @@ const docTemplate = `{
         },
         "/metrics": {
             "get": {
-                "description": "Retrieves aggregated metrics including processing time, file size, and top words.",
+                "description": "Retrieves aggregated metrics including processing time, file size, and top 10 most seen words",
                 "produces": [
                     "application/json"
                 ],
@@ -880,7 +880,7 @@ const docTemplate = `{
         },
         "/upload": {
             "post": {
-                "description": "Uploads a file, processes it for TF-IDF, and saves to database",
+                "description": "Uploads a file, processes it for TF-IDF, sets up metrics, and saves to database",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -960,7 +960,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Вход пользователя и установка JWT куки",
+                "summary": "User login and setting JWT cookie",
                 "parameters": [
                     {
                         "description": "Данные для входа",
@@ -1009,7 +1009,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Выход пользователя (удаление куки)",
+                "summary": "User logout (delete cookies)",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1025,7 +1025,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Получить информацию о текущем пользователе",
+                "summary": "Get information about the current user",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1077,7 +1077,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Регистрация нового пользователя",
+                "summary": "New user registration",
                 "parameters": [
                     {
                         "description": "Регистрационные данные",
@@ -1131,7 +1131,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Удалить пользователя и его папку",
+                "summary": "Delete user (everything related)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1178,7 +1178,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Обновить пароль пользователя",
+                "summary": "Update user password",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1363,15 +1363,11 @@ const docTemplate = `{
             "description": "This is the standard response format for all API endpoints",
             "type": "object",
             "properties": {
-                "data": {
-                    "description": "Data contains the successful response payload (optional)"
-                },
+                "data": {},
                 "error": {
-                    "description": "Error contains error message if the request failed (optional)",
                     "type": "string"
                 },
                 "is_success": {
-                    "description": "IsSuccess indicates whether the request was successful",
                     "type": "boolean"
                 }
             }

@@ -65,13 +65,10 @@ definitions:
   helper.Response:
     description: This is the standard response format for all API endpoints
     properties:
-      data:
-        description: Data contains the successful response payload (optional)
+      data: {}
       error:
-        description: Error contains error message if the request failed (optional)
         type: string
       is_success:
-        description: IsSuccess indicates whether the request was successful
         type: boolean
     type: object
   models.Collection:
@@ -432,7 +429,8 @@ paths:
       - Collections
   /collections/{collection_id}/statistics:
     get:
-      description: Returns TF-IDF statistics for all documents in a collection
+      description: 'Gets statistics for the collection: TF is calculated as if all
+        documents in the collection were one document, IDF unchanged'
       parameters:
       - description: Collection ID
         in: path
@@ -622,7 +620,9 @@ paths:
       - Documents
   /documents/{document_id}/statistics:
     get:
-      description: Returns TF-IDF statistics for a document
+      description: Calculates TF statistics for a given document, and IDF calculated
+        as if all documents in collections, where the document we specified is, is
+        in one collection
       parameters:
       - description: Document ID
         in: path
@@ -663,7 +663,7 @@ paths:
   /metrics:
     get:
       description: Retrieves aggregated metrics including processing time, file size,
-        and top words.
+        and top 10 most seen words
       produces:
       - application/json
       responses:
@@ -712,7 +712,8 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Uploads a file, processes it for TF-IDF, and saves to database
+      description: Uploads a file, processes it for TF-IDF, sets up metrics, and saves
+        to database
       parameters:
       - description: Document file to upload
         in: formData
@@ -779,7 +780,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.Response'
-      summary: Удалить пользователя и его папку
+      summary: Delete user (everything related)
       tags:
       - Users
     patch:
@@ -816,7 +817,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.Response'
-      summary: Обновить пароль пользователя
+      summary: Update user password
       tags:
       - Users
   /users/login:
@@ -850,7 +851,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.Response'
-      summary: Вход пользователя и установка JWT куки
+      summary: User login and setting JWT cookie
       tags:
       - Users
   /users/logout:
@@ -862,7 +863,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/helper.Response'
-      summary: Выход пользователя (удаление куки)
+      summary: User logout (delete cookies)
       tags:
       - Users
   /users/me:
@@ -889,7 +890,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.Response'
-      summary: Получить информацию о текущем пользователе
+      summary: Get information about the current user
       tags:
       - Users
   /users/register:
@@ -923,7 +924,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/helper.Response'
-      summary: Регистрация нового пользователя
+      summary: New user registration
       tags:
       - Users
   /version:
