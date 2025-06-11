@@ -14,7 +14,7 @@
 * `Performance` — для улучшений производительности
 * `Experimental` — для экспериментальных функций
 
-## [Unreleased]
+### [11.06.2025] — v1.2.0
 
 ### Added
 
@@ -34,6 +34,8 @@
 
 * Добавлен github.com/golang-jwt/jwt/v4 для генерации jwt
 * Добавлен golang.org/x/crypto для хэширования пароля юзера
+* Добавлен github.com/swaggo/gin-swagger
+* Добавлен github.com/swaggo/files
 
 ## [29.05.2025] — v1.1.0
 
