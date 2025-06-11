@@ -118,7 +118,7 @@ cd TF-IDF-counter
    ```
    docker-compose up --build
    ```
-4. Приложение будет доступно по адресу: [http://localhost](http://localhost). В [http://localhost/swagger/index.html](http://localhost/swagger/index.html) находится swagger ui где можете посмотреть документацию по api и протестировать ее.
+4. Приложение будет доступно по адресу: [http://localhost:8080](http://localhost:8080). В [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) находится swagger ui где можете посмотреть документацию по api и протестировать ее.
 
 ## Использование
 
