@@ -24,8 +24,8 @@ func ShowUploadForm(c *gin.Context) {
 
 // HandleFileUpload godoc
 // @Summary Upload and process a document
-// @Description Uploads a file, processes it for TF-IDF, sets up metrics, and saves to database
-// @Tags Documents
+// @Description Uploads a file, processes it for TF and IDF, gives top 50 rare words, sets up metrics, and saves to database. Only in this case: IDF = log(total words / count)
+// @Tags Upload document
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "Document file to upload"

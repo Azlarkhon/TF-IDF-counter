@@ -712,8 +712,9 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Uploads a file, processes it for TF-IDF, sets up metrics, and saves
-        to database
+      description: 'Uploads a file, processes it for TF and IDF, gives top 50 rare
+        words, sets up metrics, and saves to database. Only in this case: IDF = log(total
+        words / count)'
       parameters:
       - description: Document file to upload
         in: formData
@@ -752,7 +753,7 @@ paths:
             $ref: '#/definitions/helper.Response'
       summary: Upload and process a document
       tags:
-      - Documents
+      - Upload document
   /users/{user_id}:
     delete:
       parameters:
@@ -837,8 +838,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/helper.Response'
         "400":
           description: Bad Request
           schema:
@@ -949,3 +949,10 @@ paths:
       tags:
       - Health
 swagger: "2.0"
+tags:
+- name: Upload document
+- name: Users
+- name: Collections
+- name: Documents
+- name: Metrics
+- name: Health

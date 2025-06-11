@@ -18,6 +18,13 @@ import (
 // @description API for document processing using TF-IDF algorithm
 // @host localhost
 // @BasePath /
+
+// @tag.name Upload document
+// @tag.name Users
+// @tag.name Collections
+// @tag.name Documents
+// @tag.name Metrics
+// @tag.name Health
 func main() {
 	database.ConnectDatabase()
 

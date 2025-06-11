@@ -880,7 +880,7 @@ const docTemplate = `{
         },
         "/upload": {
             "post": {
-                "description": "Uploads a file, processes it for TF-IDF, sets up metrics, and saves to database",
+                "description": "Uploads a file, processes it for TF and IDF, gives top 50 rare words, sets up metrics, and saves to database. Only in this case: IDF = log(total words / count)",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -888,7 +888,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Documents"
+                    "Upload document"
                 ],
                 "summary": "Upload and process a document",
                 "parameters": [
@@ -976,8 +976,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/helper.Response"
                         }
                     },
                     "400": {
@@ -1499,7 +1498,27 @@ const docTemplate = `{
                 }
             }
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Upload document"
+        },
+        {
+            "name": "Users"
+        },
+        {
+            "name": "Collections"
+        },
+        {
+            "name": "Documents"
+        },
+        {
+            "name": "Metrics"
+        },
+        {
+            "name": "Health"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

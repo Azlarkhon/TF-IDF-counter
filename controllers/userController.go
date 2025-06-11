@@ -103,7 +103,7 @@ func Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param credentials body dto.LoginRequest true "Данные для входа"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} helper.Response
 // @Failure 400 {object} helper.Response
 // @Failure 401 {object} helper.Response
 // @Failure 500 {object} helper.Response
@@ -149,11 +149,10 @@ func Login(c *gin.Context) {
 		false,        // HTTP-Only (защита от XSS)
 	)
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
 		"id":         user.ID,
 		"token":      token,
-		"is_success": true,
-	})
+	})) 
 }
 
 // Logout godoc
