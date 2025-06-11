@@ -6,6 +6,7 @@ import (
 	"tfidf-app/config"
 	"tfidf-app/database"
 	_ "tfidf-app/docs"
+	"tfidf-app/middleware"
 	"tfidf-app/routes"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
+	router.Use(middleware.CorsMiddleware)
 
 	router.LoadHTMLGlob("templates/*")
 
