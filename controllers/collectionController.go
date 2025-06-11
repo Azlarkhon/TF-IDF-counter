@@ -405,7 +405,7 @@ func DeleteCollection(c *gin.Context) {
 
 // GetCollectionStatistics godoc
 // @Summary Get collection statistics
-// @Description Returns TF-IDF statistics for all documents in a collection
+// @Description Gets statistics for the collection: TF is calculated as if all documents in the collection were one document, IDF unchanged
 // @Tags Collections
 // @Produce json
 // @Param collection_id path string true "Collection ID"

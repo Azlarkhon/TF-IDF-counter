@@ -161,7 +161,7 @@ func DeleteDocument(c *gin.Context) {
 
 // GetDocumentStatistics godoc
 // @Summary Get document statistics
-// @Description Returns TF-IDF statistics for a document
+// @Description Calculates TF statistics for a given document, and IDF calculated as if all documents in collections, where the document we specified is, is in one collection
 // @Tags Documents
 // @Produce json
 // @Param document_id path string true "Document ID"

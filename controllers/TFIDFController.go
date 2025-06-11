@@ -24,7 +24,7 @@ func ShowUploadForm(c *gin.Context) {
 
 // HandleFileUpload godoc
 // @Summary Upload and process a document
-// @Description Uploads a file, processes it for TF-IDF, and saves to database
+// @Description Uploads a file, processes it for TF-IDF, sets up metrics, and saves to database
 // @Tags Documents
 // @Accept multipart/form-data
 // @Produce json

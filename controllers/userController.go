@@ -17,7 +17,7 @@ import (
 )
 
 // GetMe godoc
-// @Summary Получить информацию о текущем пользователе
+// @Summary Get information about the current user
 // @Tags Users
 // @Success 200 {object} helper.Response{data=models.User}
 // @Failure 401 {object} helper.Response
@@ -52,7 +52,7 @@ func GetMe(c *gin.Context) {
 }
 
 // Register godoc
-// @Summary Регистрация нового пользователя
+// @Summary New user registration
 // @Tags Users
 // @Accept json
 // @Produce json
@@ -98,7 +98,7 @@ func Register(c *gin.Context) {
 }
 
 // Login godoc
-// @Summary Вход пользователя и установка JWT куки
+// @Summary User login and setting JWT cookie
 // @Tags Users
 // @Accept json
 // @Produce json
@@ -157,7 +157,7 @@ func Login(c *gin.Context) {
 }
 
 // Logout godoc
-// @Summary Выход пользователя (удаление куки)
+// @Summary User logout (delete cookies)
 // @Tags Users
 // @Produce json
 // @Success 200 {object} helper.Response
@@ -176,7 +176,7 @@ func Logout(c *gin.Context) {
 }
 
 // UpdateUser godoc
-// @Summary Обновить пароль пользователя
+// @Summary Update user password
 // @Tags Users
 // @Accept json
 // @Produce json
@@ -223,7 +223,7 @@ func UpdateUser(c *gin.Context) {
 }
 
 // DeleteUser godoc
-// @Summary Удалить пользователя и его папку
+// @Summary Delete user (everything related)
 // @Tags Users
 // @Produce json
 // @Param user_id path int true "ID пользователя"

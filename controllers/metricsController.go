@@ -40,7 +40,7 @@ func GetVersion(c *gin.Context) {
 
 // GetMetrics godoc
 // @Summary Get application metrics
-// @Description Retrieves aggregated metrics including processing time, file size, and top words.
+// @Description Retrieves aggregated metrics including processing time, file size, and top 10 most seen words
 // @Tags Metrics
 // @Produce json
 // @Success 200 {object} helper.Response{data=models.Metric} "Application metrics"
