@@ -83,11 +83,6 @@ func GetDocumentByID(c *gin.Context) {
 		return
 	}
 
-	if document.UserID != userID {
-		c.JSON(http.StatusForbidden, helper.NewErrorResponse("Access denied"))
-		return
-	}
-
 	content, err := os.ReadFile(document.FilePath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to read document content"))
