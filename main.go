@@ -28,11 +28,13 @@ import (
 func main() {
 	database.ConnectDatabase()
 
+	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*")
 
-	routes.Routes(router)
+	routes.MetricsRoute(router)
 	routes.UserRoutes(router)
 	routes.DocumentRoute(router)
 	routes.CollectionRoute(router)

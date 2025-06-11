@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Routes(r *gin.Engine) {
+func MetricsRoute(r *gin.Engine) {
 	r.GET("/", controllers.ShowUploadForm)
 
 	r.GET("/status", controllers.GetStatus)
