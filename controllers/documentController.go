@@ -45,6 +45,9 @@ func NewDocumentController(db *gorm.DB) DocumentController {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /documents/{document_id}/huffman [get]
+
+// Time complexity: O(n)
+// Space complexity: O(n)
 func (d *documentController) GetDocumentHuffman(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {

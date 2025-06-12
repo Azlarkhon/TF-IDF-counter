@@ -40,6 +40,8 @@ func (pq *PriorityQueue) Pop() any {
 	return item
 }
 
+// Time complexity: O(n)
+// Space complexity: O(m)
 func buildFreq(content []byte) map[byte]int {
 	freq := make(map[byte]int)
 	for _, b := range content {
@@ -48,6 +50,8 @@ func buildFreq(content []byte) map[byte]int {
 	return freq
 }
 
+// Time complexity: O(m log(m))
+// Space complexity: O(m)
 func buildHuffmanTree(freqMap map[byte]int) (*Node, error) {
 	if len(freqMap) == 0 {
 		return nil, errors.New("cannot build Huffman tree from empty data")
@@ -78,6 +82,8 @@ func buildHuffmanTree(freqMap map[byte]int) (*Node, error) {
 	return root, nil
 }
 
+// Time complexity: O(m)
+// Space complexity: O(m + L)
 func generateCodes(node *Node, prefix string, codeMap map[byte]string) {
 	if node == nil {
 		return
@@ -92,6 +98,8 @@ func generateCodes(node *Node, prefix string, codeMap map[byte]string) {
 	generateCodes(node.Right, prefix+"1", codeMap)
 }
 
+// Time complexity: O(n + m log(m))
+// Space complexity: O(n + m)
 func HuffmanEncoding(content []byte) (string, *Node, error) {
 	freqMap := buildFreq(content)
 
@@ -111,6 +119,8 @@ func HuffmanEncoding(content []byte) (string, *Node, error) {
 	return encodedBuilder.String(), root, nil
 }
 
+// Time complexity: O(k)
+// Space complexity: O(k + m)
 func HuffmanDecoding(bits string, root *Node) ([]byte, error) {
 	var out []byte
 	node := root
