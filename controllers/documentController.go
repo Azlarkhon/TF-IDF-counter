@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"log"
 	"math"
 	"net/http"
@@ -62,13 +63,23 @@ func (d *documentController) GetDocumentHuffman(c *gin.Context) {
 		return
 	}
 
-	encodedContent, err := services.HuffmanEncoding(content)
+	encodedContent, root, err := services.HuffmanEncoding(content)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to encode the conten: "+err.Error()))
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(encodedContent))
+	decoded, err := services.HuffmanDecoding(encodedContent, root)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Decoding error: "+err.Error()))
+	} else if !bytes.Equal(decoded, content) {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Decoded content doesn't match original!"))
+	}
+
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
+		"encoded_content":         encodedContent,
+		"decoded_encoded_content": string(decoded),
+	}))
 }
 
 // GetDocuments godoc
@@ -143,6 +154,8 @@ func (d *documentController) GetDocumentByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to read document content"))
 		return
 	}
+
+	log.Println(content)
 
 	response := dto.DocumentResponse{
 		ID:          document.ID,
