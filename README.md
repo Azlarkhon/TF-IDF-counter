@@ -20,6 +20,7 @@
 * PostgreSQL
 * Docker
 * Git/Github
+* Nginx
 
 ## Структура проекта
 
