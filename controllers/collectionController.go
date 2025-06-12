@@ -3,7 +3,6 @@ package controllers
 import (
 	"math"
 	"net/http"
-	"tfidf-app/database"
 	"tfidf-app/dto"
 	"tfidf-app/helper"
 	"tfidf-app/models"
@@ -12,6 +11,26 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+type CollectionController interface {
+	CreateCollection(c *gin.Context)
+	AddDocumentToCollection(c *gin.Context)
+	AddDocumentToCollections(c *gin.Context)
+	DeleteDocumentFromCollection(c *gin.Context)
+	GetCollections(c *gin.Context)
+	GetCollectionByID(c *gin.Context)
+	UpdateCollection(c *gin.Context)
+	DeleteCollection(c *gin.Context)
+	GetCollectionStatistics(c *gin.Context)
+}
+
+type collectionController struct {
+	DB *gorm.DB
+}
+
+func NewCollectionController(db *gorm.DB) CollectionController {
+	return &collectionController{DB: db}
+}
 
 // CreateCollection godoc
 // @Summary Create a new collection
@@ -25,7 +44,7 @@ import (
 // @Failure 401 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections [post]
-func CreateCollection(c *gin.Context) {
+func (col *collectionController) CreateCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -48,7 +67,7 @@ func CreateCollection(c *gin.Context) {
 		UserID: userID,
 	}
 
-	if err := database.DB.Create(&collection).Error; err != nil {
+	if err := col.DB.Create(&collection).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to create collection"))
 		return
 	}
@@ -69,7 +88,7 @@ func CreateCollection(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections/{collection_id}/{document_id} [post]
-func AddDocumentToCollection(c *gin.Context) {
+func (col *collectionController) AddDocumentToCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -89,28 +108,27 @@ func AddDocumentToCollection(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.
+	if err := col.DB.
 		Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 		return
 	}
 
 	var document models.Document
-	if err := database.DB.
+	if err := col.DB.
 		Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
 		return
 	}
 
 	// Добавление документа в коллекцию через связь many2many
-	if err := database.DB.Model(&collection).Association("Documents").Append(&document); err != nil {
+	if err := col.DB.Model(&collection).Association("Documents").Append(&document); err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to add document to collection"))
 		return
 	}
 
 	c.JSON(http.StatusOK, helper.NewSuccessResponse("Document successfully added to collection"))
 }
-
 
 // AddDocumentToCollections godoc
 // @Summary Add document to multiple collections
@@ -125,7 +143,7 @@ func AddDocumentToCollection(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections/add-many [post]
-func AddDocumentToCollections(c *gin.Context) {
+func (col *collectionController) AddDocumentToCollections(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -149,12 +167,12 @@ func AddDocumentToCollections(c *gin.Context) {
 	}
 
 	var document models.Document
-	if err := database.DB.Where("id = ? AND user_id = ?", req.DocumentID, userID).First(&document).Error; err != nil {
+	if err := col.DB.Where("id = ? AND user_id = ?", req.DocumentID, userID).First(&document).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
 		return
 	}
 
-	err = database.DB.Transaction(func(tx *gorm.DB) error {
+	err = col.DB.Transaction(func(tx *gorm.DB) error {
 		for _, collectionID := range req.CollectionIDs {
 			var collection models.Collection
 			if err := tx.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
@@ -189,7 +207,7 @@ func AddDocumentToCollections(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections/{collection_id}/{document_id} [delete]
-func DeleteDocumentFromCollection(c *gin.Context) {
+func (col *collectionController) DeleteDocumentFromCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -209,18 +227,18 @@ func DeleteDocumentFromCollection(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
+	if err := col.DB.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 		return
 	}
 
 	var document models.Document
-	if err := database.DB.Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
+	if err := col.DB.Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
 		return
 	}
 
-	if err := database.DB.Model(&collection).Association("Documents").Delete(&document); err != nil {
+	if err := col.DB.Model(&collection).Association("Documents").Delete(&document); err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to remove document from collection"))
 		return
 	}
@@ -237,7 +255,7 @@ func DeleteDocumentFromCollection(c *gin.Context) {
 // @Failure 401 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections [get]
-func GetCollections(c *gin.Context) {
+func (col *collectionController) GetCollections(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -250,7 +268,7 @@ func GetCollections(c *gin.Context) {
 	}
 
 	var collections []models.Collection
-	if err := database.DB.Preload("Documents").Where("user_id = ?", userID).Find(&collections).Error; err != nil {
+	if err := col.DB.Preload("Documents").Where("user_id = ?", userID).Find(&collections).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get collections"))
 		return
 	}
@@ -270,7 +288,7 @@ func GetCollections(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections/{collection_id} [get]
-func GetCollectionByID(c *gin.Context) {
+func (col *collectionController) GetCollectionByID(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -289,7 +307,7 @@ func GetCollectionByID(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.Preload("Documents").First(&collection, collectionID).Error; err != nil {
+	if err := col.DB.Preload("Documents").First(&collection, collectionID).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 		return
 	}
@@ -311,7 +329,7 @@ func GetCollectionByID(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections/{collection_id} [put]
-func UpdateCollection(c *gin.Context) {
+func (col *collectionController) UpdateCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -336,7 +354,7 @@ func UpdateCollection(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
+	if err := col.DB.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 			return
@@ -346,7 +364,7 @@ func UpdateCollection(c *gin.Context) {
 	}
 
 	collection.Name = req.Name
-	if err := database.DB.Save(&collection).Error; err != nil {
+	if err := col.DB.Save(&collection).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to update collection"))
 		return
 	}
@@ -366,7 +384,7 @@ func UpdateCollection(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections/{collection_id} [delete]
-func DeleteCollection(c *gin.Context) {
+func (col *collectionController) DeleteCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -385,7 +403,7 @@ func DeleteCollection(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
+	if err := col.DB.Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 			return
@@ -394,7 +412,7 @@ func DeleteCollection(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Delete(&collection).Error; err != nil {
+	if err := col.DB.Delete(&collection).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to delete collection"))
 		return
 	}
@@ -414,7 +432,7 @@ func DeleteCollection(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /collections/{collection_id}/statistics [get]
-func GetCollectionStatistics(c *gin.Context) {
+func (col *collectionController) GetCollectionStatistics(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -433,7 +451,7 @@ func GetCollectionStatistics(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := database.DB.Preload("Documents").Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
+	if err := col.DB.Preload("Documents").Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 			return

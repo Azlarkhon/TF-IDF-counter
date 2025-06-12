@@ -3,39 +3,25 @@ package controllers
 import (
 	"errors"
 	"net/http"
-	"tfidf-app/database"
 	"tfidf-app/helper"
 	"tfidf-app/models"
-	"tfidf-app/version"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// GetStatus godoc
-// @Summary Get API status
-// @Description Provides the current status of the API
-// @Tags Health
-// @Produce json
-// @Success 200 {object} helper.Response{data=object{status=string}} "API status"
-// @Router /status [get]
-func GetStatus(c *gin.Context) {
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
-		"status": "OK",
-	}))
+type MetricsController interface {
+	GetMetrics(c *gin.Context)
 }
 
-// GetVersion godoc
-// @Summary Get application version
-// @Description Provides the current version of the application
-// @Tags Health
-// @Produce json
-// @Success 200 {object} helper.Response{data=object{version=string}} "Application version"
-// @Router /version [get]
-func GetVersion(c *gin.Context) {
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
-		"version": version.AppVersion,
-	}))
+// metricsController implements MetricsController
+type metricsController struct {
+	DB *gorm.DB
+}
+
+// NewMetricsController returns an instance of MetricsController
+func NewMetricsController(db *gorm.DB) MetricsController {
+	return &metricsController{DB: db}
 }
 
 // GetMetrics godoc
@@ -47,10 +33,10 @@ func GetVersion(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /metrics [get]
-func GetMetrics(c *gin.Context) {
+func (m *metricsController) GetMetrics(c *gin.Context) {
 	var metric models.Metric
 
-	result := database.DB.
+	result := m.DB.
 		Preload("Words", func(db *gorm.DB) *gorm.DB {
 			return db.Order("count DESC").Limit(10)
 		}).

@@ -2,22 +2,25 @@ package routes
 
 import (
 	"tfidf-app/controllers"
+	"tfidf-app/database"
 	"tfidf-app/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func UserRoutes(r *gin.Engine) {
+	userController := controllers.NewUserController(database.DB)
+
 	userGroup := r.Group("/users")
 
-	userGroup.POST("/login", controllers.Login)
-	userGroup.POST("/register", controllers.Register)
-	userGroup.GET("/logout", controllers.Logout)
+	userGroup.POST("/login", userController.Login)
+	userGroup.POST("/register", userController.Register)
+	userGroup.GET("/logout", userController.Logout)
 
 	userGroup.Use(middleware.AuthMiddleware)
 	{
-		userGroup.GET("/me", controllers.GetMe)
-		userGroup.PATCH("/:user_id", controllers.UpdateUser)
-		userGroup.DELETE("/:user_id", controllers.DeleteUser)
+		userGroup.GET("/me", userController.GetMe)
+		userGroup.PATCH("/:user_id", userController.UpdateUser)
+		userGroup.DELETE("/:user_id", userController.DeleteUser)
 	}
 }

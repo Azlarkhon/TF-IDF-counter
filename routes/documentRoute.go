@@ -2,18 +2,22 @@ package routes
 
 import (
 	"tfidf-app/controllers"
+	"tfidf-app/database"
 	"tfidf-app/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func DocumentRoute(r *gin.Engine) {
+	documentController := controllers.NewDocumentController(database.DB)
+
 	protected := r.Group("/documents")
 	protected.Use(middleware.AuthMiddleware)
 	{
-		protected.GET("/", controllers.GetDocuments)
-		protected.GET("/:document_id", controllers.GetDocumentByID)
-		protected.DELETE("/:document_id", controllers.DeleteDocument)
-		protected.GET("/:document_id/statistics", controllers.GetDocumentStatistics)
+		protected.GET("/", documentController.GetDocuments)
+		protected.GET("/:document_id", documentController.GetDocumentByID)
+		protected.DELETE("/:document_id", documentController.DeleteDocument)
+		protected.GET("/:document_id/statistics", documentController.GetDocumentStatistics)
+		protected.GET("/:document_id/huffman", documentController.GetDocumentHuffman)
 	}
 }

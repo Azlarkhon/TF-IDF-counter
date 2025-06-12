@@ -16,6 +16,61 @@ import (
 	"gorm.io/gorm"
 )
 
+type DocumentController interface {
+	GetDocumentHuffman(c *gin.Context)
+	GetDocuments(c *gin.Context)
+	GetDocumentByID(c *gin.Context)
+	DeleteDocument(c *gin.Context)
+	GetDocumentStatistics(c *gin.Context)
+}
+
+type documentController struct {
+	DB *gorm.DB
+}
+
+func NewDocumentController(db *gorm.DB) DocumentController {
+	return &documentController{DB: db}
+}
+
+func (d *documentController) GetDocumentHuffman(c *gin.Context) {
+	userID, err := helper.GetUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
+		return
+	}
+
+	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
+	if !authorized {
+		return
+	}
+
+	docID := c.Param("document_id")
+	if docID == "" {
+		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Document ID is required"))
+		return
+	}
+
+	var document models.Document
+	if err := database.DB.First(&document, docID).Error; err != nil {
+		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+		return
+	}
+
+	content, err := os.ReadFile(document.FilePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to read document content"))
+		return
+	}
+
+	encodedContent, err := services.HuffmanEncoding(content)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to encode the conten: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(encodedContent))
+}
+
 // GetDocuments godoc
 // @Summary Get all user documents
 // @Description Returns a list of all documents belonging to the authenticated user
@@ -25,7 +80,7 @@ import (
 // @Failure 401 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /documents [get]
-func GetDocuments(c *gin.Context) {
+func (d *documentController) GetDocuments(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -59,7 +114,7 @@ func GetDocuments(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /documents/{document_id} [get]
-func GetDocumentByID(c *gin.Context) {
+func (d *documentController) GetDocumentByID(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -111,7 +166,7 @@ func GetDocumentByID(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /documents/{document_id} [delete]
-func DeleteDocument(c *gin.Context) {
+func (d *documentController) DeleteDocument(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -166,7 +221,7 @@ func DeleteDocument(c *gin.Context) {
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /documents/{document_id}/statistics [get]
-func GetDocumentStatistics(c *gin.Context) {
+func (d *documentController) GetDocumentStatistics(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))

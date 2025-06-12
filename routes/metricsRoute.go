@@ -2,17 +2,17 @@ package routes
 
 import (
 	"tfidf-app/controllers"
+	"tfidf-app/database"
 	"tfidf-app/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func MetricsRoute(r *gin.Engine) {
-	r.GET("/", controllers.ShowUploadForm)
+	metricsController := controllers.NewMetricsController(database.DB)
 
-	r.GET("/status", controllers.GetStatus)
-	r.GET("/version", controllers.GetVersion)
-	r.GET("/metrics", controllers.GetMetrics)
+	r.GET("/", controllers.ShowUploadForm)
+	r.GET("/metrics", metricsController.GetMetrics)
 
 	protected := r.Group("/")
 	protected.Use(middleware.AuthMiddleware)

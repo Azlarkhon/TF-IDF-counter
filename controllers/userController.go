@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"tfidf-app/database"
 	"tfidf-app/dto"
 	"tfidf-app/helper"
 	"tfidf-app/models"
@@ -16,6 +15,23 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserController interface {
+	GetMe(c *gin.Context)
+	Register(c *gin.Context)
+	Login(c *gin.Context)
+	Logout(c *gin.Context)
+	UpdateUser(c *gin.Context)
+	DeleteUser(c *gin.Context)
+}
+
+type userController struct {
+	DB *gorm.DB
+}
+
+func NewUserController(db *gorm.DB) UserController {
+	return &userController{DB: db}
+}
+
 // GetMe godoc
 // @Summary Get information about the current user
 // @Tags Users
@@ -24,7 +40,7 @@ import (
 // @Failure 404 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /users/me [get]
-func GetMe(c *gin.Context) {
+func (u *userController) GetMe(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
@@ -38,7 +54,7 @@ func GetMe(c *gin.Context) {
 
 	var me models.User
 
-	result := database.DB.Where("id = ?", userID).First(&me)
+	result := u.DB.Where("id = ?", userID).First(&me)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, helper.NewErrorResponse("User not found"))
@@ -61,7 +77,7 @@ func GetMe(c *gin.Context) {
 // @Failure 400 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /users/register [post]
-func Register(c *gin.Context) {
+func (u *userController) Register(c *gin.Context) {
 	var req dto.RegisterUserRequest
 
 	err := c.BindJSON(&req)
@@ -71,7 +87,7 @@ func Register(c *gin.Context) {
 	}
 
 	var existing models.User
-	result := database.DB.Where("email = ?", req.Email).First(&existing)
+	result := u.DB.Where("email = ?", req.Email).First(&existing)
 	if result.RowsAffected > 0 {
 		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Email already registered"))
 		return
@@ -88,7 +104,7 @@ func Register(c *gin.Context) {
 		Password: string(hashedPassword),
 	}
 
-	result = database.DB.Create(&newUser)
+	result = u.DB.Create(&newUser)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to create user"))
 		return
@@ -108,7 +124,7 @@ func Register(c *gin.Context) {
 // @Failure 401 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /users/login [post]
-func Login(c *gin.Context) {
+func (u *userController) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -117,7 +133,7 @@ func Login(c *gin.Context) {
 	}
 
 	var user models.User
-	result := database.DB.Where("email = ?", req.Email).First(&user)
+	result := u.DB.Where("email = ?", req.Email).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("Invalid email or password"))
@@ -150,9 +166,9 @@ func Login(c *gin.Context) {
 	)
 
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
-		"id":         user.ID,
-		"token":      token,
-	})) 
+		"id":    user.ID,
+		"token": token,
+	}))
 }
 
 // Logout godoc
@@ -161,7 +177,7 @@ func Login(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} helper.Response
 // @Router /users/logout [get]
-func Logout(c *gin.Context) {
+func (u *userController) Logout(c *gin.Context) {
 	c.SetCookie(
 		"auth_token",
 		"",
@@ -186,7 +202,7 @@ func Logout(c *gin.Context) {
 // @Failure 401 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /users/{user_id} [patch]
-func UpdateUser(c *gin.Context) {
+func (u *userController) UpdateUser(c *gin.Context) {
 	idStr := c.Param("user_id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -212,7 +228,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	result := database.DB.Model(&models.User{}).Where("id = ?", id).Update("password", string(hashedPassword))
+	result := u.DB.Model(&models.User{}).Where("id = ?", id).Update("password", string(hashedPassword))
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to update password"))
 		return
@@ -231,7 +247,7 @@ func UpdateUser(c *gin.Context) {
 // @Failure 401 {object} helper.Response
 // @Failure 500 {object} helper.Response
 // @Router /users/{user_id} [delete]
-func DeleteUser(c *gin.Context) {
+func (u *userController) DeleteUser(c *gin.Context) {
 	idStr := c.Param("user_id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -252,11 +268,12 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	// Удаление пользователя из базы данных
-	result := database.DB.Delete(&models.User{}, id)
+	result := u.DB.Delete(&models.User{}, id)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to delete user"))
 		return
 	}
 
-	Logout(c)
+	c.SetCookie("auth_token", "", -1, "/", "", false, false)
+	c.JSON(http.StatusOK, helper.NewSuccessResponse("User deleted and logged out successfully"))
 }

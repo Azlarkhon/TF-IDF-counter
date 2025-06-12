@@ -36,6 +36,7 @@ func main() {
 
 	router.LoadHTMLGlob("templates/*")
 
+	routes.HealthRoute(router)
 	routes.MetricsRoute(router)
 	routes.UserRoutes(router)
 	routes.DocumentRoute(router)
