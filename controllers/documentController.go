@@ -166,9 +166,7 @@ func (d *documentController) GetDocumentByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to read document content"))
 		return
 	}
-
-	log.Println(content)
-
+	
 	response := dto.DocumentResponse{
 		ID:          document.ID,
 		Name:        document.Name,
