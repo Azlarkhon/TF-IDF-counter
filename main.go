@@ -17,7 +17,6 @@ import (
 // @title TF-IDF counter API
 // @version 1.2.0
 // @description API for document processing using TF-IDF algorithm
-// @host 37.9.53.45:8080
 // @BasePath /
 
 // @tag.name Upload document

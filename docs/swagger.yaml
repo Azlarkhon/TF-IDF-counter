@@ -154,7 +154,6 @@ definitions:
       word:
         type: string
     type: object
-host: 37.9.53.45:8080
 info:
   contact: {}
   description: API for document processing using TF-IDF algorithm

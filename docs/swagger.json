@@ -6,7 +6,6 @@
         "contact": {},
         "version": "1.2.0"
     },
-    "host": "37.9.53.45:8080",
     "basePath": "/",
     "paths": {
         "/collections": {
