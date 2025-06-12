@@ -33,6 +33,18 @@ func NewDocumentController(db *gorm.DB) DocumentController {
 	return &documentController{DB: db}
 }
 
+// GetDocumentHuffman godoc
+// @Summary Get Huffman encoded and decoded content of a document
+// @Description Encodes the document content using Huffman algorithm and returns both encoded and decoded result for verification
+// @Tags Documents
+// @Produce json
+// @Param document_id path string true "Document ID"
+// @Success 200 {object} helper.Response{data=object} "Encoded and decoded content"
+// @Failure 400 {object} helper.Response
+// @Failure 401 {object} helper.Response
+// @Failure 404 {object} helper.Response
+// @Failure 500 {object} helper.Response
+// @Router /documents/{document_id}/huffman [get]
 func (d *documentController) GetDocumentHuffman(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
