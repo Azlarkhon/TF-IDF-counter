@@ -187,7 +187,7 @@ func (u *userController) Logout(c *gin.Context) {
 		false,
 		false,
 	)
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
+	c.JSON(http.StatusOK, helper.NewSuccessResponse("You have successfully logged out"))
 }
 
 // UpdateUser godoc

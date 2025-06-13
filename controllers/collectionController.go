@@ -243,7 +243,7 @@ func (col *collectionController) DeleteDocumentFromCollection(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
+	c.JSON(http.StatusOK, helper.NewSuccessResponse("Document successfully deleted from collection"))
 }
 
 // GetCollections godoc
@@ -417,7 +417,7 @@ func (col *collectionController) DeleteCollection(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
+	c.JSON(http.StatusOK, helper.NewSuccessResponse("Collection deleted successfully"))
 }
 
 // GetCollectionStatistics godoc

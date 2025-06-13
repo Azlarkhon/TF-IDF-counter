@@ -229,7 +229,7 @@ func (d *documentController) DeleteDocument(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.NewSuccessResponse(nil))
+	c.JSON(http.StatusOK, helper.NewSuccessResponse("Document deleted successfully"))
 }
 
 // GetDocumentStatistics godoc
