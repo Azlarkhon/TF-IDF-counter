@@ -375,7 +375,7 @@ const docTemplate = `{
         },
         "/collections/{collection_id}/statistics": {
             "get": {
-                "description": "Gets statistics for the collection: TF is calculated as if all documents in the collection were one document, IDF unchanged",
+                "description": "Gets statistics for the collection: TF is calculated as if all documents in the collection were one document, IDF unchanged (gives top 50 most frequent words and their idf)",
                 "produces": [
                     "application/json"
                 ],

@@ -422,7 +422,7 @@ func (col *collectionController) DeleteCollection(c *gin.Context) {
 
 // GetCollectionStatistics godoc
 // @Summary Get collection statistics
-// @Description Gets statistics for the collection: TF is calculated as if all documents in the collection were one document, IDF unchanged
+// @Description Gets statistics for the collection: TF is calculated as if all documents in the collection were one document, IDF unchanged (gives top 50 most frequent words and their idf)
 // @Tags Collections
 // @Produce json
 // @Param collection_id path string true "Collection ID"
