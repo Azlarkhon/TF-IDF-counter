@@ -64,11 +64,6 @@
 * `README.md` — описание проекта
 * Nginx — базовая настройка для проксирования, ограничения нагрузки и масштабируемости
 
-### Changed
-
-* `controllers/controller.go` → `controllers/TFIDFController.go`
-* `services/service.go` → `services/TFIDFService.go` — переименование для повышения читаемости и модульности
-
 ### Dependency
 
 * `github.com/joho/godotenv v1.5.1` — поддержка `.env`
