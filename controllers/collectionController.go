@@ -307,7 +307,7 @@ func (col *collectionController) GetCollectionByID(c *gin.Context) {
 	}
 
 	var collection models.Collection
-	if err := col.DB.Preload("Documents").First(&collection, collectionID).Error; err != nil {
+	if err := col.DB.Preload("Documents").Where("id = ? AND user_id = ?", collectionID, userID).First(&collection).Error; err != nil {
 		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Collection not found"))
 		return
 	}

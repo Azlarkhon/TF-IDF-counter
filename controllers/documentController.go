@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"sort"
-	"tfidf-app/database"
 	"tfidf-app/dto"
 	"tfidf-app/helper"
 	"tfidf-app/models"
@@ -64,8 +63,12 @@ func (d *documentController) GetDocumentHuffman(c *gin.Context) {
 	}
 
 	var document models.Document
-	if err := database.DB.First(&document, docID).Error; err != nil {
-		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+	if err := d.DB.Where("id = ? AND user_id = ?", docID, userID).First(&document).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get document"))
 		return
 	}
 
@@ -116,7 +119,7 @@ func (d *documentController) GetDocuments(c *gin.Context) {
 	}
 
 	var documents []models.Document
-	if err := database.DB.Where("user_id = ?", userID).Find(&documents).Error; err != nil {
+	if err := d.DB.Where("user_id = ?", userID).Find(&documents).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to fetch documents"))
 		return
 	}
@@ -156,8 +159,12 @@ func (d *documentController) GetDocumentByID(c *gin.Context) {
 	}
 
 	var document models.Document
-	if err := database.DB.First(&document, docID).Error; err != nil {
-		c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+	if err := d.DB.Where("id = ? AND user_id = ?", docID, userID).First(&document).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get document"))
 		return
 	}
 
@@ -166,7 +173,7 @@ func (d *documentController) GetDocumentByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to read document content"))
 		return
 	}
-	
+
 	response := dto.DocumentResponse{
 		ID:          document.ID,
 		Name:        document.Name,
@@ -208,7 +215,7 @@ func (d *documentController) DeleteDocument(c *gin.Context) {
 	}
 
 	var document models.Document
-	if err := database.DB.Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
+	if err := d.DB.Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
 			return
@@ -224,7 +231,7 @@ func (d *documentController) DeleteDocument(c *gin.Context) {
 	}
 
 	// Удаление записи из базы данных
-	if err := database.DB.Delete(&document).Error; err != nil {
+	if err := d.DB.Delete(&document).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to delete document from database"))
 		return
 	}
@@ -263,7 +270,7 @@ func (d *documentController) GetDocumentStatistics(c *gin.Context) {
 	}
 
 	var document models.Document
-	if err := database.DB.Preload("Collections").Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
+	if err := d.DB.Preload("Collections").Where("id = ? AND user_id = ?", documentID, userID).First(&document).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, helper.NewErrorResponse("Document not found"))
 			return
