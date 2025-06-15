@@ -162,7 +162,7 @@ func (u *userController) Login(c *gin.Context) {
 		"/",          // Путь
 		"",           // Домен (localhost)
 		false,        // Secure (HTTPS-only)
-		false,        // HTTP-Only (защита от XSS)
+		true,        // HTTP-Only (защита от XSS)
 	)
 
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
@@ -185,7 +185,7 @@ func (u *userController) Logout(c *gin.Context) {
 		"/",
 		"",
 		false,
-		false,
+		true,
 	)
 	c.JSON(http.StatusOK, helper.NewSuccessResponse("You have successfully logged out"))
 }
@@ -274,6 +274,6 @@ func (u *userController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("auth_token", "", -1, "/", "", false, false)
+	c.SetCookie("auth_token", "", -1, "/", "", false, true)
 	c.JSON(http.StatusOK, helper.NewSuccessResponse("User deleted and logged out successfully"))
 }
