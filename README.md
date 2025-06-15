@@ -124,11 +124,11 @@ cd TF-IDF-counter
    ```
    docker-compose up --build
    ```
-4. Приложение будет доступно по адресу: [http://localhost:8080](http://localhost:8080). В [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) находится swagger ui где можете посмотреть документацию по api и протестировать ее.
+4. В [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) будет swagger ui где можете посмотреть документацию по api и протестировать ее.
 
 ## Использование
 
-1. Пользователь загружает тестовый файл (`*.txt`).
+1. Пользователь загружает тестовый файл (`*.txt`) в swagger ui.
 2. Программа вычисляет:
    - TF (Term Frequency) - частота термина в документе.
    - IDF (Inverse Document Frequency) - обратная частота документа.
@@ -149,11 +149,11 @@ cd TF-IDF-counter
 
 ## История изменений
 
-Все изменения и обновления проекта фиксируются в файле [CHANGELOG.md](./CHANGELOG.md).
+Все изменения и обновления проекта фиксируются в файле [CHANGELOG.md](./docs/CHANGELOG.md).
 
 ## Диаграмма датабазы
 
-[DATABASE-DIAGRAM.md](./DB-DIAGRAM.md)
+[DATABASE-DIAGRAM.md](./docs/DB-DIAGRAM.md)
 
 ## Версия
 

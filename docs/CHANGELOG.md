@@ -36,6 +36,7 @@
 ### Changed
 
 * Добавил транзакцию(db) в HandleFileUpload
+* Архитектура проекта
 
 ### Dependency
 
@@ -43,6 +44,10 @@
 * Добавлен golang.org/x/crypto для хэширования пароля юзера
 * Добавлен github.com/swaggo/gin-swagger
 * Добавлен github.com/swaggo/files
+
+### Removed
+
+* templates - фронтенд мне уже не нужен, т.к. имеется сваггер документация
 
 ## [29.05.2025] — v1.1.0
 

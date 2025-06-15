@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 	"log"
-	"tfidf-app/config"
-	"tfidf-app/models"
+	"tfidf-app/internal/config"
+	"tfidf-app/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

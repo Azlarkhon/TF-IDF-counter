@@ -7,20 +7,14 @@ import (
 	"path/filepath"
 	"time"
 
-	"tfidf-app/database"
-	"tfidf-app/helper"
-	"tfidf-app/models"
-	"tfidf-app/services"
+	"tfidf-app/internal/database"
+	"tfidf-app/internal/helper"
+	"tfidf-app/internal/models"
+	"tfidf-app/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
-
-func ShowUploadForm(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.tmpl", gin.H{
-		"words": nil,
-	})
-}
 
 // HandleFileUpload godoc
 // @Summary Upload and process a document
@@ -128,7 +122,7 @@ func HandleFileUpload(c *gin.Context) {
 		stats = stats[:50]
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
 		"words": stats,
-	})
+	}))
 }

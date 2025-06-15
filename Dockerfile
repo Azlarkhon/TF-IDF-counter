@@ -6,7 +6,7 @@ RUN go mod download
 COPY . .
 
 # Статическая сборка бинарника
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o /bin/main ./main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -o /bin/main ./cmd/server/main.go
 
 FROM alpine:3.18 AS production
 

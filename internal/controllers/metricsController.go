@@ -3,8 +3,8 @@ package controllers
 import (
 	"errors"
 	"net/http"
-	"tfidf-app/helper"
-	"tfidf-app/models"
+	"tfidf-app/internal/helper"
+	"tfidf-app/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

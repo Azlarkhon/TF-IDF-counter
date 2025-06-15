@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"tfidf-app/controllers"
-	"tfidf-app/database"
+	"tfidf-app/internal/controllers"
+	"tfidf-app/internal/database"
 
 	"github.com/gin-gonic/gin"
 )

@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-	"tfidf-app/database"
-	"tfidf-app/models"
+	"tfidf-app/internal/database"
+	"tfidf-app/internal/models"
 )
 
 type WordStat struct {

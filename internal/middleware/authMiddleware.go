@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"net/http"
-	"tfidf-app/helper"
+	"tfidf-app/internal/helper"
 
 	"github.com/gin-gonic/gin"
 )

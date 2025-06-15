@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"net/http"
-	"tfidf-app/helper"
+	"tfidf-app/internal/helper"
 	"tfidf-app/version"
 
 	"github.com/gin-gonic/gin"

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"tfidf-app/models"
+	"tfidf-app/internal/models"
 	"time"
 
 	"gorm.io/gorm"

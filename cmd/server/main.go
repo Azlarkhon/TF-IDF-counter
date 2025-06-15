@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"tfidf-app/config"
-	"tfidf-app/database"
 	_ "tfidf-app/docs"
-	"tfidf-app/middleware"
-	"tfidf-app/routes"
+	"tfidf-app/internal/config"
+	"tfidf-app/internal/database"
+	"tfidf-app/internal/middleware"
+	"tfidf-app/internal/routes"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -32,8 +32,6 @@ func main() {
 
 	router := gin.Default()
 	router.Use(middleware.CorsMiddleware)
-
-	router.LoadHTMLGlob("templates/*")
 
 	routes.UploadRoute(router)
 	routes.HealthRoute(router)

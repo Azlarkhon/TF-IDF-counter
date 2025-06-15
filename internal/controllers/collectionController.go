@@ -3,10 +3,10 @@ package controllers
 import (
 	"math"
 	"net/http"
-	"tfidf-app/dto"
-	"tfidf-app/helper"
-	"tfidf-app/models"
-	"tfidf-app/services"
+	"tfidf-app/internal/dto"
+	"tfidf-app/internal/helper"
+	"tfidf-app/internal/models"
+	"tfidf-app/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

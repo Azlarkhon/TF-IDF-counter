@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"tfidf-app/dto"
-	"tfidf-app/helper"
-	"tfidf-app/models"
+	"tfidf-app/internal/dto"
+	"tfidf-app/internal/helper"
+	"tfidf-app/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"

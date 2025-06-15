@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"tfidf-app/config"
+	"tfidf-app/internal/config"
 	"time"
 
 	"github.com/gin-gonic/gin"
