@@ -57,7 +57,7 @@ func (u *userController) GetMe(c *gin.Context) {
 	result := u.DB.Where("id = ?", userID).First(&me)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, helper.NewErrorResponse("User not found"))
+			c.JSON(http.StatusNotFound, helper.NewErrorResponse("You are not authorized"))
 		} else {
 			c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Database error"))
 		}
