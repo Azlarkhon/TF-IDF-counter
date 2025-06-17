@@ -21,7 +21,10 @@ func (pq PriorityQueue) Len() int {
 
 // Smaller frequency has higher priority
 func (pq PriorityQueue) Less(a, b int) bool {
-	return pq[a].Freq < pq[b].Freq
+    if pq[a].Freq == pq[b].Freq {
+        return pq[a].Symbol < pq[b].Symbol // Break ties by symbol value
+    }
+    return pq[a].Freq < pq[b].Freq
 }
 
 func (pq PriorityQueue) Swap(a, b int) {
