@@ -47,11 +47,6 @@ func (u *userController) GetMe(c *gin.Context) {
 		return
 	}
 
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
-		return
-	}
-
 	var me models.User
 
 	result := u.DB.Where("id = ?", userID).First(&me)

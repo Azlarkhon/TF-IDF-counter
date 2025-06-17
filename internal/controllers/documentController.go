@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"tfidf-app/internal/dto"
 	"tfidf-app/internal/helper"
 	"tfidf-app/internal/models"
 	"tfidf-app/internal/services"
-	"tfidf-app/internal/dto"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -51,11 +51,6 @@ func (d *documentController) GetDocumentHuffman(c *gin.Context) {
 		return
 	}
 
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
-		return
-	}
-
 	docID := c.Param("document_id")
 	if docID == "" {
 		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Document ID is required"))
@@ -92,8 +87,7 @@ func (d *documentController) GetDocumentHuffman(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, helper.NewSuccessResponse(gin.H{
-		"encoded_content":         encodedContent,
-		"decoded_encoded_content": string(decoded),
+		"encoded_content": encodedContent,
 	}))
 }
 
@@ -110,11 +104,6 @@ func (d *documentController) GetDocuments(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
 		return
 	}
 
@@ -144,11 +133,6 @@ func (d *documentController) GetDocumentByID(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
 		return
 	}
 
@@ -203,11 +187,6 @@ func (d *documentController) DeleteDocument(c *gin.Context) {
 		return
 	}
 
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
-		return
-	}
-
 	documentID := c.Param("document_id")
 	if documentID == "" {
 		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Document ID is required"))
@@ -255,11 +234,6 @@ func (d *documentController) GetDocumentStatistics(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
 		return
 	}
 

@@ -51,11 +51,6 @@ func (col *collectionController) CreateCollection(c *gin.Context) {
 		return
 	}
 
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
-		return
-	}
-
 	var req dto.CreateCollectionReq
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Invalid input"))
@@ -92,11 +87,6 @@ func (col *collectionController) AddDocumentToCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
 		return
 	}
 
@@ -147,11 +137,6 @@ func (col *collectionController) AddDocumentToCollections(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
 		return
 	}
 
@@ -214,11 +199,6 @@ func (col *collectionController) DeleteDocumentFromCollection(c *gin.Context) {
 		return
 	}
 
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
-		return
-	}
-
 	collectionID := c.Param("collection_id")
 	documentID := c.Param("document_id")
 	if collectionID == "" || documentID == "" {
@@ -262,11 +242,6 @@ func (col *collectionController) GetCollections(c *gin.Context) {
 		return
 	}
 
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
-		return
-	}
-
 	var collections []models.Collection
 	if err := col.DB.Preload("Documents").Where("user_id = ?", userID).Find(&collections).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, helper.NewErrorResponse("Failed to get collections"))
@@ -292,11 +267,6 @@ func (col *collectionController) GetCollectionByID(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
 		return
 	}
 
@@ -333,11 +303,6 @@ func (col *collectionController) UpdateCollection(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
 		return
 	}
 
@@ -391,11 +356,6 @@ func (col *collectionController) DeleteCollection(c *gin.Context) {
 		return
 	}
 
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
-		return
-	}
-
 	collectionID := c.Param("collection_id")
 	if collectionID == "" {
 		c.JSON(http.StatusBadRequest, helper.NewErrorResponse("Collection ID is required"))
@@ -436,11 +396,6 @@ func (col *collectionController) GetCollectionStatistics(c *gin.Context) {
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
 		return
 	}
 

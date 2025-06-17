@@ -34,12 +34,7 @@ func HandleFileUpload(c *gin.Context) {
 
 	userID, err := helper.GetUserIDFromContext(c)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("Unauthorized"))
-		return
-	}
-
-	_, authorized := helper.CheckAuthenticationAndAuthorization(c, userID)
-	if !authorized {
+		c.JSON(http.StatusUnauthorized, helper.NewErrorResponse("You are not authorized"))
 		return
 	}
 
