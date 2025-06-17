@@ -727,7 +727,7 @@ const docTemplate = `{
         },
         "/documents/{document_id}/huffman": {
             "get": {
-                "description": "Encodes the document content using Huffman algorithm and returns both encoded and decoded result for verification",
+                "description": "Encodes the document content using Huffman algorithm",
                 "produces": [
                     "application/json"
                 ],

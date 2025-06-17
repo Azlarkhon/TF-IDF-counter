@@ -34,7 +34,7 @@ func NewDocumentController(db *gorm.DB) DocumentController {
 
 // GetDocumentHuffman godoc
 // @Summary Get Huffman encoded and decoded content of a document
-// @Description Encodes the document content using Huffman algorithm and returns both encoded and decoded result for verification
+// @Description Encodes the document content using Huffman algorithm
 // @Tags Documents
 // @Produce json
 // @Param document_id path string true "Document ID"
